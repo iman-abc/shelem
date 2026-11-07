@@ -1,14 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- STATE MANAGEMENT ---
+    const DEFAULT_PLAYERS = ['Iman', 'Sanaz', 'Reza', 'Hanieh', 'Sahar', 'Hosein', 'Saeid', 'Roya', 'Mahsa'];
+    const OLD_DEFAULT_PLAYERS = ['میلاد', 'فاطمه', 'امیرحسین', 'فهیمه', 'محمد', 'مسعود', 'یاسمن', 'نیلا', 'زهرا', 'سمن', 'هانیه', 'حلما', 'نسرین', 'فرشته', 'عباس'];
+    // Capitalize the first letter of Latin names (iman -> Iman); Persian names are untouched
+    const normalizeName = (n) => (n || '').trim().replace(/\s+/g, ' ').replace(/^[a-z]/, c => c.toUpperCase());
     let state = {
         modalStack: [], // For nested modals
         history: [], // Simple view stack
         games: [],
         activeGameId: null,
-        recentPlayers: [
-            'میلاد', 'فاطمه', 'امیرحسین', 'فهیمه', 'محمد', 'مسعود', 'یاسمن',
-            'نیلا', 'زهرا', 'سمن', 'هانیه', 'حلما', 'نسرین', 'فرشته', 'عباس'
-        ],
+        recentPlayers: [...DEFAULT_PLAYERS],
     };
 
     moment.locale('fa');
@@ -32,6 +33,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (parsedState && Array.isArray(parsedState.games)) {
                         state = { ...state, ...parsedState };
                     }
+                    // drop the old built-in suggestions, make sure the new ones exist
+                    const mine = (state.recentPlayers || []).filter(n => !OLD_DEFAULT_PLAYERS.includes(n)).map(normalizeName);
+                    state.recentPlayers = [...new Set([...mine, ...DEFAULT_PLAYERS])].slice(0, 20);
                 } catch (e) {
                     console.error("Error parsing state from localStorage", e);
                 }
@@ -1106,13 +1110,13 @@ document.addEventListener('DOMContentLoaded', () => {
         openModal(modalHtml, () => {
             document.querySelectorAll('.recent-player-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
-                    const newName = btn.textContent.trim();
+                    const newName = normalizeName(btn.textContent);
                     if (newName) callback(newName);
                 });
             });
 
             document.getElementById('confirm-player-name').addEventListener('click', () => {
-                const newName = document.getElementById('player-name-input').value.trim();
+                const newName = normalizeName(document.getElementById('player-name-input').value);
                 if (newName) callback(newName);
             });
         });
@@ -1427,7 +1431,7 @@ document.addEventListener('DOMContentLoaded', () => {
             state.recentPlayers.splice(index, 1);
         }
         state.recentPlayers.unshift(name);
-        if (state.recentPlayers.length > 15) {
+        if (state.recentPlayers.length > 20) {
             state.recentPlayers.pop();
         }
         db.save();
