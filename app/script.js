@@ -52,6 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
         getGames: () => state.games,
         showAdminGames: (rows) => showAdminGamesModal(rows),
         setGames: (games) => {
+            reopenStaleFinished(games);
             state.games = games;
             db.persist();
             const cur = state.history[state.history.length - 1];
@@ -361,7 +362,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem;">بازی تمام شده</p>
                     <p style="font-size: 1rem; font-weight: normal; line-height: 1.8;">
                         ${winnerTeam} با امتیاز <span class="score-value">${toPersianDigits(winnerScore)}</span> بر <span class="score-value">${toPersianDigits(loserScore)}</span> ${loserTeam} را ${verb}.
-                        ${game.finishReason === 'gap' ? '<br><small>(اختلاف امتیاز به نصفِ سقف بازی رسید)</small>' : ''}
+                        ${game.finishReason === 'gap' ? '<br><small>(اختلاف امتیاز به سقف بازی رسید)</small>' : ''}
                     </p>
                 </div>
             `;
@@ -1398,13 +1399,22 @@ document.addEventListener('DOMContentLoaded', () => {
         return { hakem: finalHakemScore, nonHakem: finalNonHakemScore, lockedZero };
     };
 
-    // Game ends when a team reaches the target OR the gap between teams is >= half of the target.
+    // Game ends when a team reaches the target OR the gap between the two teams is >= the target (saghf).
     const checkFinished = (game) => {
         const t1 = game.hands.reduce((a, h) => a + h.scores.team1, 0);
         const t2 = game.hands.reduce((a, h) => a + h.scores.team2, 0);
         const reached = t1 >= game.targetScore || t2 >= game.targetScore;
-        const gap = Math.abs(t1 - t2) >= game.targetScore / 2;
+        const gap = Math.abs(t1 - t2) >= game.targetScore;
         return { finished: reached || gap, reason: reached ? 'target' : gap ? 'gap' : null, winner: t1 === t2 ? null : (t1 > t2 ? 'team1' : 'team2') };
+    };
+
+    // Games closed by the old "half of target" gap rule are re-opened if they don't meet the current rule.
+    const reopenStaleFinished = (games) => {
+        let changed = false;
+        games.forEach(g => {
+            if (g.isFinished && g.finishReason === 'gap' && !checkFinished(g).finished) { g.isFinished = false; delete g.finishReason; changed = true; }
+        });
+        return changed;
     };
 
     const calculateAndRecordScores = (gameId, nonHakemScore) => {
@@ -1461,7 +1471,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="winner-modal-content">
                 <p style="font-size: 3rem;">🎉</p>
                 <h2>تبریک به تیم برنده!</h2>
-                ${reason === 'gap' ? '<p style="color:var(--text-muted);font-size:.85rem">اختلاف امتیاز به نصفِ سقف بازی رسید</p>' : ''}
+                ${reason === 'gap' ? '<p style="color:var(--text-muted);font-size:.85rem">اختلاف امتیاز به سقف بازی رسید</p>' : ''}
                 <p class="team-names">${winnerPlayers.join(' و ')}</p>
                 <button id="close-winner-modal" class="btn btn-primary btn-full">بستن</button>
             </div>
@@ -1964,6 +1974,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- INITIALIZATION ---
     const init = () => {
         db.load();
+        if (reopenStaleFinished(state.games)) db.save();
         renderRulesBadges();
         state.history = [{ page: 'home-page', context: null }];
         updateUI('home-page', null);
