@@ -192,3 +192,12 @@ html, body, button, input, textarea, select, .lock-box, .modal-content { font-fa
 #user-btn[data-sync="offline"]::after { background: var(--text-muted); }
 #user-btn[data-sync="local"]::after { display: none; }
 .lock-note { margin: .5rem .75rem .75rem; padding: .45rem .7rem; font-size: .8rem; border-radius: 10px; background: var(--primary-soft); color: var(--text-color); }
+
+/* --- Admin read-only view --- */
+.readonly-view #start-new-hand-btn, .readonly-view #register-score-btn, .readonly-view #edit-hand-btn,
+.readonly-view .edit-btn, .readonly-view #export-game-btn { display: none !important; }
+.ro-banner { text-align: center; padding: .5rem; margin-bottom: .75rem; border-radius: 10px; background: var(--primary-soft); color: var(--primary-color); font-size: .85rem; font-weight: 600; }
+.admin-games { max-height: 65vh; overflow-y: auto; text-align: right; }
+.admin-games h4 { margin: .9rem 0 .4rem; color: var(--primary-color); }
+.admin-game-btn { display: flex !important; flex-direction: column; align-items: flex-start; gap: .15rem; width: 100%; margin-bottom: .4rem; text-align: right; }
+.admin-game-btn small { color: var(--text-muted); font-weight: 400; }

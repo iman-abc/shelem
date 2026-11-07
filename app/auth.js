@@ -147,10 +147,15 @@
             <p>${note || STATUS_TEXT[syncState] || ''}</p>
             <button id="m-sync">همگام‌سازی اکنون</button>
             <button id="m-pw">تغییر رمز</button>
-            ${session.is_admin ? '<button id="m-users">مدیریت کاربران</button>' : ''}
+            ${session.is_admin ? '<button id="m-all">همهٔ بازی‌ها (مدیر)</button><button id="m-users">مدیریت کاربران</button>' : ''}
             <button class="danger" id="m-out">خروج از حساب</button>`);
         $('#m-sync', el).addEventListener('click', () => { sync.run(); close(); });
         $('#m-pw', el).addEventListener('click', showChangePassword);
+        $('#m-all', el)?.addEventListener('click', async () => {
+            if (!navigator.onLine) return alert(ERR.network);
+            try { const rows = await rpc('app_admin_list_games', { p_token: tok() }); close(); window.ShelemBridge.showAdminGames(rows); }
+            catch (e) { setErr(el, e.message.includes('Could not find') ? 'ابتدا فایل 03_admin_view_all_games.sql را در Supabase اجرا کنید' : e.message); alert(e.message); }
+        });
         $('#m-users', el)?.addEventListener('click', () => navigator.onLine ? showUsers() : setErr(el, ERR.network) || alert(ERR.network));
         $('#m-out', el).addEventListener('click', () => { if (confirm('خروج از حساب؟ بازی‌های همگام‌شده روی سرور می‌مانند.')) logout(); });
     };

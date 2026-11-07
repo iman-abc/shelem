@@ -43,9 +43,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // Admin read-only copies of other users' games (never saved / synced)
+    let viewGames = [];
+    const findGame = (id) => state.games.find(g => g.id === id) || viewGames.find(g => g.id === id);
+
     // Bridge used by auth.js to merge games coming from the server
     window.ShelemBridge = {
         getGames: () => state.games,
+        showAdminGames: (rows) => showAdminGamesModal(rows),
         setGames: (games) => {
             state.games = games;
             db.persist();
@@ -309,13 +314,15 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     
     const renderGamePage = (gameId) => {
-        const game = state.games.find(g => g.id === gameId);
+        const game = findGame(gameId);
         if (!game) {
             navigateTo('home-page');
             return;
         }
 
         const gamePage = document.getElementById('game-page');
+        gamePage.classList.toggle('readonly-view', !!game._readOnly);
+        document.getElementById('history-page').classList.toggle('readonly-view', !!game._readOnly);
         const team1Score = game.hands.reduce((acc, hand) => acc + hand.scores.team1, 0);
         const team2Score = game.hands.reduce((acc, hand) => acc + hand.scores.team2, 0);
         const remaining1 = game.targetScore - team1Score;
@@ -404,6 +411,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         gamePage.innerHTML = `
+            ${game._readOnly ? `<div class="ro-banner">👁 بازی «${game._owner}» · فقط مشاهده</div>` : ''}
             <h2>${game.name}</h2>
             <div class="game-header-info">
                 <div class="meta-item">
@@ -524,7 +532,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const renderHistoryPage = (gameId) => {
-        const game = state.games.find(g => g.id === gameId);
+        const game = findGame(gameId);
         const historyPage = document.getElementById('history-page');
         let content = `<h2>تاریخچه دست‌ها</h2>`;
 
@@ -918,6 +926,33 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- MODAL CONTENT & LOGIC ---
+    const showAdminGamesModal = (rows) => {
+        viewGames = rows.filter(r => r.data).map(r => ({ ...r.data, id: `v:${r.owner}:${r.game_id}`, _readOnly: true, _owner: r.owner }));
+        const byOwner = {};
+        viewGames.forEach(g => (byOwner[g._owner] = byOwner[g._owner] || []).push(g));
+        const total = (g, t) => g.hands.reduce((a, h) => a + h.scores[t], 0);
+        const owners = Object.keys(byOwner).sort();
+        const html = `
+            <div class="modal-header"><h2>همهٔ بازی‌ها (مدیر)</h2><button class="modal-close-btn">&times;</button></div>
+            <div class="admin-games">
+                ${owners.length ? owners.map(o => `
+                    <h4>${o} <small>(${toPersianDigits(byOwner[o].length)})</small></h4>
+                    ${byOwner[o].map(g => `
+                        <button class="grid-btn admin-game-btn" data-vid="${g.id}">
+                            <strong>${g.name}</strong>
+                            <span>${g.players.p1} و ${g.players.p3} <b>${toPersianDigits(total(g, 'team1'))}</b> — <b>${toPersianDigits(total(g, 'team2'))}</b> ${g.players.p2} و ${g.players.p4}</span>
+                            <small>${getRelativeTimeWithDay(g.lastActivity || g.createdAt)}${g.isFinished ? ' · تمام‌شده' : ''}</small>
+                        </button>`).join('')}
+                `).join('') : '<p class="placeholder">هنوز بازی‌ای روی سرور ثبت نشده است.</p>'}
+            </div>`;
+        openModal(html, () => {
+            document.querySelectorAll('.admin-game-btn').forEach(btn => btn.addEventListener('click', () => {
+                closeModal();
+                navigateTo('game-page', { gameId: btn.dataset.vid });
+            }));
+        });
+    };
+
     const showNewGameModal = (step = 1, gameData = {}) => {
         let html = '';
         switch (step) {
@@ -1123,7 +1158,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     
     const showNewHandModal = (gameId, step, isEditing = false, handData = {}) => {
-        const game = state.games.find(g => g.id === gameId);
+        const game = findGame(gameId);
         if (isEditing && Object.keys(handData).length === 0) {
             handData = { ...game.currentHand };
         }
@@ -1216,7 +1251,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const showRegisterScoreModal = (gameId, fromFlow = false) => {
-        const game = state.games.find(g => g.id === gameId);
+        const game = findGame(gameId);
         const hand = game.currentHand;
         const nonHakemTeam = getOppositeTeam(game, hand.hakem);
         const nonHakemPlayers = getTeamPlayers(game, nonHakemTeam).map(p => game.players[p]);
@@ -1268,7 +1303,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     
     const showEditHandModal = (gameId, handIndex) => {
-        const game = state.games.find(g => g.id === gameId);
+        const game = findGame(gameId);
         const hand = game.hands[handIndex];
         const nonHakemTeam = getOppositeTeam(game, hand.hakem);
         const nonHakemPlayers = getTeamPlayers(game, nonHakemTeam).map(p => game.players[p]);
@@ -1361,7 +1396,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const calculateAndRecordScores = (gameId, nonHakemScore) => {
-        const game = state.games.find(g => g.id === gameId);
+        const game = findGame(gameId);
         const currentHand = game.currentHand;
         const hakemTeam = getTeam(game, currentHand.hakem);
         const nonHakemTeam = getOppositeTeam(game, currentHand.hakem);
@@ -1731,7 +1766,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- IMPORT/EXPORT ---
     const exportSingleGame = (gameId) => {
-        const game = state.games.find(g => g.id === gameId);
+        const game = findGame(gameId);
         if (!game) return;
         const dataStr = JSON.stringify(game, null, 2);
         const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
@@ -1864,7 +1899,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.addEventListener('click', (e) => {
         if (e.target.closest('.delete-game-btn')) {
             const gameId = e.target.closest('.delete-game-btn').dataset.gameId;
-            const game = state.games.find(g => g.id === gameId);
+            const game = findGame(gameId);
             const confirmationModalHtml = `
                 <div class="modal-header"><h2>تایید حذف</h2></div>
                 <p>آیا از حذف بازی «${game.name}» مطمئن هستید؟</p>
