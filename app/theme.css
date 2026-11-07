@@ -137,3 +137,34 @@ main, main.header-scrolled { padding-top: calc(var(--header-height) + 1rem) !imp
 .suit-chip[data-suit="hearts"], .suit-chip[data-suit="diamonds"] { color: #ef4444; }
 .modal-sub { color: var(--text-muted); font-size: .9rem; text-align: center; margin-bottom: .25rem; }
 .fail-threshold { color: var(--danger-color); font-size: .85rem; text-align: center; margin-bottom: .75rem; }
+
+/* --- Rules table, credit, lock --- */
+.rules-table { width: 100%; border-collapse: collapse; font-size: .9rem; margin: .5rem 0 1.5rem; }
+.rules-table th, .rules-table td { padding: .6rem .7rem; border-bottom: 1px solid var(--border-color); text-align: right; vertical-align: top; }
+.rules-table th { width: 32%; color: var(--text-muted); font-weight: 600; }
+.rules-table tr.r-ok th { color: var(--success-color); }
+.rules-table tr.r-bad th { color: var(--danger-color); }
+.app-credit-footer a { color: var(--primary-color); text-decoration: none; font-weight: 600; }
+.app-credit-footer span { opacity: .8; }
+.app-credit-footer { text-align: center; margin: 1.5rem 0 5rem; line-height: 1.9; }
+#lock-btn {
+    position: absolute; left: 3.25rem; top: 50%; transform: translateY(-50%);
+    background: transparent; border: 0; color: var(--text-color); cursor: pointer;
+    width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center;
+}
+#lock-btn:hover { background: var(--surface-2); }
+#lock-btn.on { color: var(--success-color); }
+.lock-overlay {
+    position: fixed; inset: 0; z-index: 10000; background: var(--background-color); color: var(--text-color);
+    display: grid; place-items: center; padding: 1.5rem; font-family: var(--font-family); direction: rtl;
+}
+.lock-box { width: 100%; max-width: 340px; background: var(--surface); border: 1px solid var(--border-color); border-radius: 20px; padding: 1.5rem; text-align: center; }
+.lock-box h2 { font-size: 1.2rem; margin-bottom: .25rem; }
+.lock-box p { color: var(--text-muted); font-size: .85rem; margin-bottom: 1rem; }
+.lock-box input { width: 100%; padding: .75rem; border-radius: 12px; margin-bottom: .6rem; font: inherit; text-align: center; letter-spacing: .15em; }
+.lock-box button { width: 100%; padding: .75rem; border-radius: 12px; border: 1px solid var(--border-color); font: inherit; cursor: pointer; margin-top: .4rem; background: var(--surface-2); color: var(--text-color); }
+.lock-box button.primary { background: var(--primary-color); color: #fff; border-color: transparent; }
+.lock-box button.danger { color: var(--danger-color); background: transparent; font-size: .8rem; }
+.lock-err { color: var(--danger-color); font-size: .85rem; min-height: 1.2em; }
+.offline-dl { text-align: center; margin: -3.5rem 0 5rem; font-size: .85rem; }
+.offline-dl a { color: var(--primary-color); }

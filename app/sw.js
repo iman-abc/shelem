@@ -1,5 +1,5 @@
-const CACHE = 'shelem-v2';
-const ASSETS = ['./','./index.html','./style.css','./theme.css','./script.js','./manifest.webmanifest','./icon.svg',
+const CACHE = 'shelem-v3';
+const ASSETS = ['./','./index.html','./style.css','./theme.css','./script.js','./lock.js','./manifest.webmanifest','./icon.svg',
   './lib/chart.js','./lib/chartjs-plugin-annotation.min.js','./lib/jalali-moment.browser.js','./fonts/fonts.css',
   './fonts/Dxxo8j6PP2D_kU2muijlE8WWIGroe7ll.woff2','./fonts/Dxxo8j6PP2D_kU2muijlGMWWIGroe7ll.woff2','./fonts/Dxxo8j6PP2D_kU2muijlHcWWIGroew.woff2'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting())); });
