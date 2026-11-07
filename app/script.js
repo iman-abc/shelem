@@ -361,6 +361,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem;">بازی تمام شده</p>
                     <p style="font-size: 1rem; font-weight: normal; line-height: 1.8;">
                         ${winnerTeam} با امتیاز <span class="score-value">${toPersianDigits(winnerScore)}</span> بر <span class="score-value">${toPersianDigits(loserScore)}</span> ${loserTeam} را ${verb}.
+                        ${game.finishReason === 'gap' ? '<br><small>(اختلاف امتیاز به نصفِ سقف بازی رسید)</small>' : ''}
                     </p>
                 </div>
             `;
@@ -1348,6 +1349,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         tempGame.badges = newBadges;
                     }
                     game.badges = tempGame.badges;
+                    const fin2 = checkFinished(game);
+                    game.isFinished = fin2.finished; game.finishReason = fin2.reason;
 
 
                     game.lastActivity = Date.now();
@@ -1395,6 +1398,15 @@ document.addEventListener('DOMContentLoaded', () => {
         return { hakem: finalHakemScore, nonHakem: finalNonHakemScore, lockedZero };
     };
 
+    // Game ends when a team reaches the target OR the gap between teams is >= half of the target.
+    const checkFinished = (game) => {
+        const t1 = game.hands.reduce((a, h) => a + h.scores.team1, 0);
+        const t2 = game.hands.reduce((a, h) => a + h.scores.team2, 0);
+        const reached = t1 >= game.targetScore || t2 >= game.targetScore;
+        const gap = Math.abs(t1 - t2) >= game.targetScore / 2;
+        return { finished: reached || gap, reason: reached ? 'target' : gap ? 'gap' : null, winner: t1 === t2 ? null : (t1 > t2 ? 'team1' : 'team2') };
+    };
+
     const calculateAndRecordScores = (gameId, nonHakemScore) => {
         const game = findGame(gameId);
         const currentHand = game.currentHand;
@@ -1421,16 +1433,13 @@ document.addEventListener('DOMContentLoaded', () => {
         game.currentHand = null;
         game.lastActivity = Date.now();
         
-        const team1Total = game.hands.reduce((acc, h) => acc + h.scores.team1, 0);
-        const team2Total = game.hands.reduce((acc, h) => acc + h.scores.team2, 0);
-
-        if (team1Total >= game.targetScore || team2Total >= game.targetScore) {
+        const fin = checkFinished(game);
+        if (fin.finished) {
             game.isFinished = true;
-            const winnerTeam = team1Total === team2Total ? null : (team1Total > team2Total ? 'team1' : 'team2');
-            
-            if (winnerTeam) {
-                const winnerPlayers = getTeamPlayers(game, winnerTeam).map(p => game.players[p]);
-                showWinnerModal(winnerPlayers);
+            game.finishReason = fin.reason;
+            if (fin.winner) {
+                const winnerPlayers = getTeamPlayers(game, fin.winner).map(p => game.players[p]);
+                showWinnerModal(winnerPlayers, fin.reason);
             }
         }
 
@@ -1442,7 +1451,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
     
-    const showWinnerModal = (winnerPlayers) => {
+    const showWinnerModal = (winnerPlayers, reason) => {
         const html = `
             <div class="modal-header">
                 <h2>پایان بازی!</h2>
@@ -1450,6 +1459,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="winner-modal-content">
                 <p style="font-size: 3rem;">🎉</p>
                 <h2>تبریک به تیم برنده!</h2>
+                ${reason === 'gap' ? '<p style="color:var(--text-muted);font-size:.85rem">اختلاف امتیاز به نصفِ سقف بازی رسید</p>' : ''}
                 <p class="team-names">${winnerPlayers.join(' و ')}</p>
                 <button id="close-winner-modal" class="btn btn-primary btn-full">بستن</button>
             </div>

@@ -6,9 +6,11 @@
     const $ = (s, r = document) => r.querySelector(s);
     const readJSON = (k) => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } };
 
+    const GUEST_KEY = 'shelem-guest';
     let session = configured ? readJSON(SESSION_KEY) : null;
-    // Each user gets their own saved games on this device.
-    window.SHELEM_STORAGE_KEY = (configured && session) ? 'shelem-app-state:' + session.username : 'shelem-app-state';
+    const guest = configured && !session && localStorage.getItem(GUEST_KEY) === '1';   // "offline mode": no login, local only
+    // Each user gets their own saved games on this device; guest mode has its own local store.
+    window.SHELEM_STORAGE_KEY = (configured && session) ? 'shelem-app-state:' + session.username : guest ? 'shelem-app-state:__guest' : 'shelem-app-state';
 
     // ---------- server calls ----------
     const ERR = {
@@ -59,7 +61,10 @@
             <input id="lg-u" placeholder="نام کاربری" autocomplete="username" autocapitalize="off" dir="ltr">
             <input id="lg-p" type="password" placeholder="رمز عبور" autocomplete="current-password" dir="ltr">
             <div class="lock-err"></div>
-            <button class="primary" id="lg-go">ورود</button>`, false);
+            <button class="primary" id="lg-go">ورود</button>
+            <button class="ghost" id="lg-guest">ادامه بدون ورود (حالت آفلاین)</button>
+            <p style="margin:.6rem 0 0;font-size:.75rem">در حالت آفلاین فقط نتایج روی همین دستگاه ذخیره می‌شود و به سرور نمی‌رود.</p>`, false);
+        $('#lg-guest', el).addEventListener('click', () => { localStorage.setItem(GUEST_KEY, '1'); location.reload(); });
         const go = async () => {
             const u = $('#lg-u', el).value.trim(), p = $('#lg-p', el).value;
             if (!u || !p) return setErr(el, 'نام کاربری و رمز را وارد کنید');
@@ -72,6 +77,7 @@
                     localStorage.setItem(key, localStorage.getItem('shelem-app-state'));
                     localStorage.setItem('shelem-adopted', r.username);
                 }
+                localStorage.removeItem(GUEST_KEY);
                 localStorage.setItem(SESSION_KEY, JSON.stringify({ token: r.token, username: r.username, is_admin: r.is_admin }));
                 location.reload();
             } catch (e) { setErr(el, e.message); busy(b, false); }
@@ -140,6 +146,11 @@
 
     const STATUS_TEXT = { ok: 'همگام‌سازی شد ✓', syncing: 'در حال همگام‌سازی…', pending: 'تغییرات در انتظار ارسال', offline: 'آفلاین — پس از اتصال همگام می‌شود', error: 'خطا در همگام‌سازی', local: 'حالت محلی' };
     const showMenu = (note) => {
+        if (guest) {
+            const el = dialog(`<h2>حالت آفلاین</h2><p>بدون ورود؛ نتایج فقط روی همین دستگاه ذخیره می‌شود و همگام نمی‌شود.</p>
+                <button class="primary" id="m-login">ورود به حساب</button>`);
+            return $('#m-login', el).addEventListener('click', () => { localStorage.removeItem(GUEST_KEY); location.reload(); });
+        }
         if (!configured) {
             return dialog(`<h2>حالت محلی</h2><p>سرور تنظیم نشده است؛ اطلاعات فقط روی همین دستگاه ذخیره می‌شود و ورود لازم نیست.</p>`);
         }
@@ -161,7 +172,7 @@
     };
 
     // ---------- sync ----------
-    let syncState = configured ? 'pending' : 'local';
+    let syncState = (configured && !guest) ? 'pending' : 'local';
     const setState = (s) => { syncState = s; $('#user-btn')?.setAttribute('data-sync', s); };
     const hashOf = (o) => { const s = JSON.stringify(o); let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return String(h); };
     const sync = (() => {
@@ -188,6 +199,7 @@
                         if (local && localUnchanged) { games.splice(i, 1); changedLocal = true; delete hashes[row.game_id]; }
                         else if (!local) delete hashes[row.game_id];
                     } else if (!local) {
+                        if (hashes[row.game_id] !== undefined) continue;   // deleted on this device -> tombstone is pushed below
                         games.push(row.data); hashes[row.game_id] = hashOf(row.data); changedLocal = true;
                     } else if (localUnchanged) {
                         if (hashOf(row.data) !== hashOf(local)) { games[i] = row.data; changedLocal = true; }
@@ -221,9 +233,9 @@
     // ---------- start ----------
     const userBtn = $('#user-btn');
     userBtn?.addEventListener('click', () => showMenu());
-    if (userBtn) userBtn.setAttribute('data-sync', syncState);
+    if (userBtn) { userBtn.setAttribute('data-sync', syncState); if (guest) userBtn.title = 'حالت آفلاین'; }
 
-    if (configured) {
+    if (configured && !guest) {
         if (!session) {
             showLogin(navigator.onLine ? '' : 'برای اولین ورود باید به اینترنت وصل باشید');
             window.addEventListener('online', () => { if (!session && $('#lg-u')) $('.lock-box p').textContent = 'با نام کاربری و رمز خود وارد شوید'; });

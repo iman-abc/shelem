@@ -4,7 +4,11 @@
     <meta name="theme-color" content="#4f46e5">
     <link rel="manifest" href="./manifest.webmanifest">
     <link rel="icon" href="./icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="./icon.svg">
+    <link rel="apple-touch-icon" href="./icon-180.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="شلم">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ثبت امتیازات شلم</title>
     <script>(function(){var t=localStorage.getItem("shelem-theme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");document.documentElement.setAttribute("data-theme",t);})();</script>
@@ -78,6 +82,7 @@
                                 <tr class="r-bad"><th>تعهد ۳۳۰ یا ۶۶۰ ناموفق</th><td>حاکم −۳۳۰ یا −۶۶۰ می‌گیرد (یاسا ندارد)؛ حریف امتیاز خودش را می‌برد</td></tr>
                                 <tr class="r-bad"><th>قانون بالای ۱۰۰۰ (قفل شدن تیم)</th><td>وقتی امتیاز یک تیم از <b>۱۰۰۰</b> بیشتر شد (برای سقف‌های ۳۳۰/۶۶۰ به‌نسبت کمتر)، آن تیم وقتی <b>حاکم نیست</b> و حاکمِ حریف موفق شود، امتیازی که گرفته <b>حساب نمی‌شود (۰)</b>. این تیم فقط به دو راه امتیاز می‌گیرد: <b>۱)</b> خودش حاکم شود و موفق شود (امتیازش اضافه می‌شود و می‌تواند برنده شود) <b>۲)</b> حاکمِ حریف را <b>منفی‌ بزند</b> (حاکم حریف به تعهدش نرسد) که در این حالت امتیاز خودش حساب می‌شود.</td></tr>
                                 <tr><th>سقف امتیاز بازی</th><td>۳۳۰ ، ۶۶۰ ، ۱۱۶۵ (پیش‌فرض) یا عدد دلخواه</td></tr>
+                                <tr class="r-ok"><th>پایان زودهنگام (اختلاف نصف سقف)</th><td>اگر <b>اختلاف امتیاز دو تیم</b> برابر یا بیشتر از <b>نصفِ امتیاز نهایی</b> شد (مثلاً ۵۸۲٫۵ در بازی ۱۱۶۵؛ ۳۳۰ در بازی ۶۶۰)، بازی همان‌جا تمام می‌شود و تیمِ جلوتر برنده است.</td></tr>
                                 <tr><th>پایان بازی</th><td>بعد از هر دست اگر امتیاز یکی از تیم‌ها به سقف رسید بازی تمام می‌شود؛ تیمی که امتیاز بیشتری دارد برنده است</td></tr>
                                 <tr><th>تیم‌ها</th><td>بازیکن ۱ و ۳ هم‌تیمی‌اند؛ بازیکن ۲ و ۴ هم‌تیمی‌اند</td></tr>
                                 <tr><th>پاسور (دست‌دهنده)</th><td>به‌ترتیب بین چهار نفر می‌چرخد</td></tr>
@@ -286,6 +291,7 @@
             </div>
             
             <p class="app-credit-footer">توسعه و طراحی: <a href="https://github.com/iman-abc" target="_blank" rel="noopener">iman-abc</a></p>
+            <p class="offline-dl"><button id="install-btn" type="button">📲 افزودن به صفحهٔ اصلی (استفاده آفلاین)</button></p>
             <p class="offline-dl"><a href="./shelem-offline.html" download="shelem-offline.html">⬇ دانلود نسخهٔ آفلاین (یک فایل، بدون نیاز به اینترنت)</a></p>
         </main>
 
@@ -315,6 +321,7 @@
         </div>
     </div>
 
+    <script src="./install.js"></script>
     <script src="./config.js"></script>
     <script src="./auth.js"></script>
     <script src="./script.js"></script>
