@@ -2,6 +2,6 @@
    Leave both empty to run in local-only mode (no login, no server sync).
    Fill them from: Supabase -> Project Settings -> API. */
 window.SHELEM_CONFIG = {
-    supabaseUrl: '',   // e.g. 'https://abcdxyz.supabase.co'
-    anonKey: ''        // the "anon public" key
+    supabaseUrl: 'https://libgkpvudjoixregquty.supabase.co',   // e.g. 'https://abcdxyz.supabase.co'
+    anonKey: 'sb_publishable_2DzEBWGVPEKWX9gvKuJjkQ_2oeHh3PM'        // the "anon public" key
 };
