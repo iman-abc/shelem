@@ -1006,14 +1006,15 @@ input[type=number] {
     --primary-color: #8b8cf8;
     --primary-gradient: linear-gradient(135deg, #6366f1, #6366f1);
     --primary-soft: #26274a;
-    --secondary-color: #0d0f14;
-    --background-color: #0d0f14;
-    --surface: #171a22;
-    --surface-2: #232734;
+    --secondary-color: #090b10;
+    --background-color: #0b0d12;
+    --surface: #161a23;
+    --surface-2: #232838;
+    --light-color: #232838;
     --text-color: #e6e8ee;
     --text-color-light: #ffffff;
     --text-muted: #98a0b3;
-    --border-color: #262b38;
+    --border-color: #313850;
     --shadow-color: rgba(0, 0, 0, 0.4);
     --success-color: #4ade80;
     --danger-color: #f87171;
@@ -1189,6 +1190,38 @@ html, body, button, input, textarea, select, .lock-box, .modal-content { font-fa
 
 .chart-wrapper[hidden] { display: none !important; }
 #history-btn { background: var(--surface) !important; color: var(--text-color) !important; border: 1px solid var(--border-color) !important; box-shadow: none !important; }
+
+/* --- Dark mode polish --- */
+:root[data-theme="dark"] .score-box-hakem.success,
+:root[data-theme="dark"] .score-box-hakem.fail,
+:root[data-theme="dark"] .game-status { color: #08100b; }
+:root[data-theme="dark"] .score-box-opponent { background: #3d6fb4; color: #fff; }
+:root[data-theme="dark"] .badge-chip { color: #fff; }
+:root[data-theme="dark"] .badge-chip.badge-hakem { background: #7c4fd0; }
+:root[data-theme="dark"] .badge-chip.badge-team { background: #2b6fd6; }
+:root[data-theme="dark"] .badge-chip.badge-dealer { background: #d9731c; }
+:root[data-theme="dark"] .hand-card .edit-btn { background: var(--primary-color); color: #0b0d12; }
+:root[data-theme="dark"] .game-header-info { background: var(--surface) !important; border: 1px solid var(--border-color); color: var(--text-color); }
+.game-header-info { background: var(--surface) !important; border: 1px solid var(--border-color); border-radius: var(--border-radius); }
+:root[data-theme="dark"] .modal-overlay { background: rgba(0, 0, 0, 0.7); }
+:root[data-theme="dark"] .modal-content { border-color: var(--border-color) !important; box-shadow: 0 10px 40px rgba(0,0,0,.6) !important; }
+:root[data-theme="dark"] .stat-card h4, :root[data-theme="dark"] h2, :root[data-theme="dark"] h3, :root[data-theme="dark"] h4 { color: var(--text-color); }
+:root[data-theme="dark"] .stats-section h3 { border-bottom-color: var(--primary-color); }
+:root[data-theme="dark"] a { color: var(--primary-color); }
+:root[data-theme="dark"] .btn-danger { background: var(--danger-color) !important; color: #1a0a0a !important; }
+:root[data-theme="dark"] .btn-secondary { background: var(--surface-2) !important; color: var(--text-color) !important; }
+:root[data-theme="dark"] .placeholder { color: var(--text-muted); }
+:root[data-theme="dark"] .recent-player-btn, :root[data-theme="dark"] .player-btn { color: var(--text-color); }
+:root[data-theme="dark"] .player-btn.filled { color: var(--primary-color); }
+:root[data-theme="dark"] .table-center { color: var(--text-muted); }
+:root[data-theme="dark"] .winner-modal-content .team-names { color: var(--primary-color); }
+/* login / dialog fixes */
+.lock-box input { letter-spacing: normal !important; }
+.lock-box input[dir="ltr"] { text-align: center; }
+:root[data-theme="dark"] .lock-box button.primary { color: #0b0d12; }
+:root[data-theme="dark"] .lock-box button.danger { color: var(--danger-color); }
+:root[data-theme="dark"] .btn-primary, :root[data-theme="dark"] #install-btn { color: #0b0d12 !important; }
+:root[data-theme="dark"] #install-btn { color: var(--primary-color) !important; }
 
 </style>
     <style>

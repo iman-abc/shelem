@@ -1,4 +1,4 @@
-const CACHE = 'shelem-v8';
+const CACHE = 'shelem-v9';
 const ASSETS = ['./','./index.html','./style.css','./theme.css','./script.js','./config.js','./auth.js','./install.js','./icon-192.png','./icon-512.png','./icon-180.png','./manifest.webmanifest','./icon.svg',
   './lib/chart.js','./lib/chartjs-plugin-annotation.min.js','./lib/jalali-moment.browser.js','./fonts/fonts.css',
   './fonts/Dxxo8j6PP2D_kU2muijlE8WWIGroe7ll.woff2','./fonts/Dxxo8j6PP2D_kU2muijlGMWWIGroe7ll.woff2','./fonts/Dxxo8j6PP2D_kU2muijlHcWWIGroew.woff2'];
