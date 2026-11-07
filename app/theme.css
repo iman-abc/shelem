@@ -1,0 +1,139 @@
+/* Theme + minimal UI layer. Loaded after style.css and overrides it. */
+:root {
+    --primary-color: #4f46e5;
+    --primary-gradient: linear-gradient(135deg, #4f46e5, #4f46e5);
+    --primary-soft: #eef0ff;
+    --secondary-color: #f4f5f7;      /* page bg */
+    --background-color: #f4f5f7;     /* app container bg */
+    --surface: #ffffff;
+    --surface-2: #eceef2;
+    --text-color: #1f2430;
+    --text-muted: #6b7280;
+    --border-color: #e5e7eb;
+    --shadow-color: rgba(16, 24, 40, 0.06);
+    --success-color: #16a34a;
+    --danger-color: #dc2626;
+    --success-soft: #e8f7ee;
+    --danger-soft: #fdeceb;
+    --team1-color: #4f46e5;
+    --team2-color: #0ea5a4;
+    --chart-grid: rgba(0, 0, 0, 0.07);
+    --header-height: 56px;
+    --border-radius: 14px;
+    color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+    --primary-color: #8b8cf8;
+    --primary-gradient: linear-gradient(135deg, #6366f1, #6366f1);
+    --primary-soft: #26274a;
+    --secondary-color: #0d0f14;
+    --background-color: #0d0f14;
+    --surface: #171a22;
+    --surface-2: #232734;
+    --text-color: #e6e8ee;
+    --text-color-light: #ffffff;
+    --text-muted: #98a0b3;
+    --border-color: #262b38;
+    --shadow-color: rgba(0, 0, 0, 0.4);
+    --success-color: #4ade80;
+    --danger-color: #f87171;
+    --success-soft: #11291b;
+    --danger-soft: #2f1717;
+    --team1-color: #8b8cf8;
+    --team2-color: #2dd4bf;
+    --chart-grid: rgba(255, 255, 255, 0.08);
+    color-scheme: dark;
+}
+
+body, #app-container { transition: background-color .2s, color .2s; }
+#app-container { box-shadow: none; }
+
+/* --- Compact flat header --- */
+.app-header {
+    height: var(--header-height) !important;
+    padding: 0 1rem !important;
+    border-radius: 0 !important;
+    background: var(--surface) !important;
+    color: var(--text-color) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    box-shadow: none !important;
+    max-width: 800px;
+    margin: 0 auto;
+}
+.app-header .header-content { display: flex; align-items: baseline; gap: .6rem; }
+.app-header h1 { font-size: 1.25rem !important; }
+.app-header p { display: none !important; }
+main, main.header-scrolled { padding-top: calc(var(--header-height) + 1rem) !important; }
+.back-btn { color: var(--text-color) !important; }
+#theme-toggle {
+    position: absolute; left: .75rem; top: 50%; transform: translateY(-50%);
+    background: transparent; border: 0; color: var(--text-color); cursor: pointer;
+    width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center;
+}
+#theme-toggle:hover { background: var(--surface-2); }
+#theme-toggle .icon-sun { display: none; }
+:root[data-theme="dark"] #theme-toggle .icon-sun { display: block; }
+:root[data-theme="dark"] #theme-toggle .icon-moon { display: none; }
+
+/* --- Cards & surfaces --- */
+.game-card, .team-score-card, .stat-card, .hand-card, .chart-wrapper, .modal-content, .rules-content {
+    background: var(--surface) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: none !important;
+    color: var(--text-color);
+}
+.card-header, .game-card.finished .card-header {
+    background: var(--surface-2) !important;
+    color: var(--text-color) !important;
+}
+.footer-nav { background: var(--surface) !important; border-top: 1px solid var(--border-color); box-shadow: none !important; }
+.nav-btn { color: var(--text-muted); }
+.form-control, input, textarea, select {
+    background: var(--surface-2); color: var(--text-color); border: 1px solid var(--border-color);
+}
+.btn-primary { background: var(--primary-color) !important; color: #fff !important; box-shadow: none !important; }
+:root[data-theme="dark"] .btn-primary { color: #0d0f14 !important; }
+.btn { box-shadow: none; }
+.btn:not(.btn-primary) { background: var(--surface-2); color: var(--text-color); border: 1px solid var(--border-color); }
+.grid-btn, .player-btn {
+    background: var(--surface-2); color: var(--text-color); border: 1px solid var(--border-color);
+}
+.grid-btn.selected, .player-btn.filled { background: var(--primary-soft); border-color: var(--primary-color); color: var(--primary-color); }
+.grid-btn:active { transform: scale(.97); }
+.progress-bar { background: var(--primary-color) !important; }
+.score-progress { background: var(--surface-2) !important; }
+.score-value.negative, .negative { color: var(--danger-color) !important; }
+.current-hand-box {
+    background: var(--primary-soft) !important; color: var(--text-color) !important;
+    border: 1px solid var(--primary-color) !important;
+}
+.hand-card.hakem-success { border-right: 4px solid var(--success-color) !important; }
+.hand-card.hakem-failed { border-right: 4px solid var(--danger-color) !important; }
+.hand-card.shelem { background: var(--success-soft) !important; }
+.hand-card.yasa { background: var(--danger-soft) !important; }
+.modal-content { border-radius: 20px; }
+.app-credit-footer { color: var(--text-muted); font-size: .75rem; }
+
+/* --- Charts: responsive heights --- */
+.chart-wrapper { padding: .75rem !important; height: 260px !important; position: relative; }
+.chart-wrapper.full-width-chart { height: 300px !important; }
+.chart-wrapper.tall { height: 340px !important; }
+.chart-wrapper canvas { max-width: 100%; }
+@media (max-width: 480px) {
+    .chart-wrapper { height: 230px !important; padding: .5rem !important; }
+    .chart-wrapper.full-width-chart { height: 260px !important; }
+    main { padding-left: .75rem !important; padding-right: .75rem !important; }
+}
+.stats-grid > *, .individual-stats-grid > * { min-width: 0; }
+
+/* --- Optional suit chips in score modal --- */
+.suit-chips { display: flex; gap: .5rem; justify-content: center; margin: .5rem 0 1rem; }
+.suit-chip {
+    width: 52px; height: 44px; border-radius: 12px; font-size: 1.4rem; cursor: pointer;
+    background: var(--surface-2); border: 1px solid var(--border-color); color: var(--text-color);
+}
+.suit-chip.selected { background: var(--primary-soft); border-color: var(--primary-color); }
+.suit-chip[data-suit="hearts"], .suit-chip[data-suit="diamonds"] { color: #ef4444; }
+.modal-sub { color: var(--text-muted); font-size: .9rem; text-align: center; margin-bottom: .25rem; }
+.fail-threshold { color: var(--danger-color); font-size: .85rem; text-align: center; margin-bottom: .75rem; }

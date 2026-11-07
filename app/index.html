@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="theme-color" content="#4f46e5">
+    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="icon" href="./icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="./icon.svg">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ثبت امتیازات شلم</title>
+    <script>(function(){var t=localStorage.getItem("shelem-theme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");document.documentElement.setAttribute("data-theme",t);})();</script>
+    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./theme.css">
+    <link href="./fonts/fonts.css" rel="stylesheet">
+    <!-- Using Jalali-Moment for better Persian date support -->
+    <script src="./lib/jalali-moment.browser.js"></script>
+    <script src="./lib/chart.js"></script>
+    <script src="./lib/chartjs-plugin-annotation.min.js"></script>
+</head>
+<body>
+
+    <div id="app-container">
+        <!-- Header -->
+        <header id="app-header" class="app-header">
+            <button id="back-button" class="back-btn hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"></path></svg>
+            </button>
+            <div class="header-content">
+                <h1>شلم</h1>
+                <p>ثبت امتیازات بازی شلم</p>
+            </div>
+        <button id="theme-toggle" aria-label="تغییر تم">
+                <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+                <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+            </button>
+        </header>
+
+        <!-- Main Content Area -->
+        <main id="main-content">
+            <!-- Home Page -->
+            <div id="home-page" class="page active">
+                <button id="new-game-btn" class="btn btn-primary btn-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14m-7-7h14"></path></svg>
+                    بازی جدید
+                </button>
+                <div id="games-list-container"></div>
+                <div id="no-games-placeholder" class="placeholder" style="display: block;">
+                    <svg class="placeholder-icon" xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    <p>هیچ بازی‌ای ثبت نشده است</p>
+                    <span>برای شروع، بازی جدید ایجاد کنید</span>
+                </div>
+            </div>
+
+            <!-- Game Page -->
+            <div id="game-page" class="page">
+                <!-- Game details will be injected here -->
+            </div>
+
+            <!-- Rules Page -->
+            <div id="rules-page" class="page">
+                 <div class="rules-content">
+                    <h2>قوانین بازی شلم</h2>
+                    <p><strong>راهنمای کامل بازی و امتیازدهی</strong></p>
+                    
+                    <h3>شرح مختصر بازی</h3>
+                    <p>شلم از کلمه «slam» انگلیسی و «chelem» فرانسه گرفته شده است و معنی آن جمع‌آوری تمام برگ‌های بازی است. هدف این بازی رسیدن به امتیاز توافق شده (معمولاً ۱۱۶۵) زودتر از رقیب است. به نظر می‌آید این بازی بعد از حکم، محبوب‌ترین بازی در ایران باشد و افراد زیادی این بازی را بلدند. در این بازی هر بازیکن ۱۲ برگ دریافت می‌کند. بعد شروع به خواندن امتیازی که می‌توانند بگیرند می‌کنند. مثلاً ۱۲۵ امتیاز از کل ۱۶۵ امتیاز ممکن. کسی که امتیاز بالاتری را بخواند به عنوان حاکم تعیین می‌شود. سپس او با همکاری یارش باید تلاش کند تا امتیاز تعهد شده را کسب کند. در این صورت او به همان تعداد امتیاز که کسب کرده امتیاز دریافت می‌کند. بازی ادامه خواهد داشت تا وقتی که یک تیم زودتر به امتیاز نهایی ۱۱۶۵ برسد. در این بازی بردن هر دست ۵ امتیاز دارد، هر ۵ لو، ۵ امتیاز، هر ۱۰ لو، ۱۰ امتیاز و هر تک (آس) هم ۱۰ امتیاز دارد. به این ترتیب در مجموع کل امتیاز یک بازی ۱۶۵ امتیاز است.</p>
+
+                    <h3>شرح کامل بازی</h3>
+                    <h4>دست دادن</h4>
+                    <p>یک نفر از بین چهار نفر با قرعه به عنوان اولین پاسور (دست دهنده) انتخاب می‌شود. در دست‌های بعد به ترتیب از سمت راست، دیگران دست می‌دهচ্ছেন. به نحوی که بعد از چهار دور بازی همه یک بار دست داده باشند و به همین ترتیب دست دادن می‌چرخد. نفری که دست می‌دهد ابتدا ۱۲ برگ به نفر سمت راست، ۱2 برگ به نفر روبه رو، ۱۲ برگ به نفر سمت چپ، ۴ برگ به پشت روی زمین و ۱۲ برگ آخر را برای خود دست می‌دهد.</p>
+
+                    <h4>تعهد کردن (اعلان، خواندن)</h4>
+                    <p>نفر سمت راست پاسور پس از مرتب کردن دستش امتیازی را که فکر می‌کند می‌تواند بگیرد، اعلام می‌کند. این امتیاز نمی‌تواند زیر ۱۰۰ باشد. پس از آن نوبت نفر سمت راست او است. او یا باید امتیازی بالاتر از امتیاز خوانده شده را بخواند یا اعلام «پاس» کند. کسی که پاس دهد دیگر نمی‌تواند در امتیازخوانی تا پایان این دور بازی شرکت کند. سپس نوبت نفر سمت راست او می‌رسد. او هم به همین ترتیب، یا باید بالاتر از آخرین امتیاز خوانده شده بخواند یا پاس دهد. این مرحله آنقدر ادامه می‌یابد تا ۳ نفر پاس کرده و کسی که آخرین امتیاز را خوانده به عنوان حاکم بازی را آغاز می‌کند. بازیکنان می‌توانند به عنوان بیشترین تعهد ممکن «سرشلم» را تعهد کنند، به این معنی که بدون این که چهار کارت وسط را در دست خود قرار دهند، شلم کنند. در این حالت ۶۶۰ امتیاز در صورت انجام تعهد به آن‌ها تعلق می‌گیرد.</p>
+                    <p><strong>تبصره:</strong> اگر سه نفر اول پاس دهند، کارت‌ها را به پاسور برمی‌گردانند تا دوباره دست بدهد.</p>
+
+                    <h4>آغاز بازی</h4>
+                    <p>بعد از مشخص شدن حاکم، او ۴ برگ روی زمین را برمی‌دارد و به جای آن ۴ برگ به دلخواه خود زمین می‌گذارد. این کار برای بهبود دست حاکم و کمک به او برای کسب امتیاز تعهدشده صورت می‌گیرد. پس از این که او ۴ برگ را زمین گذاشت (که این برگ‌ها جزء برگ‌های برده حساب می‌شوند)، حاکم با پایین انداختن برگ حکم، بازی را شروع می‌کند. (دقت کنید که حتماً برگ اول باید برگی از خال حکم باشد و این کار در واقع اعلام حکم است.) سپس به همان ترتیب بازی حکم، بازیکنان از سمت راست شروع به بازی می‌کنند. بازی دقیقاً مانند حکم پیش می‌رود تا برگ‌ها تمام شوند.</p>
+
+                    <h4>شمارش امتیاز</h4>
+                    <p>بعد از پایان بازی نوبت به شمارش امتیازها می‌رسد. برای این کار برگ‌های برنده شده را می‌شماریم، در ازای هر ۴ برگ (یک دست از بازی) ۵ امتیاز، در ازای هر برگ ۵لو، ۵ امتیاز، در ازای هربرگ ۱۰ لو و تک (آس) هم، ۱۰ امتیاز منظور می‌شود. بعد از شمردن امتیاز یک تیم، با کم کردن آن از ۱۶۵، امتیاز تیم دیگر مشخص می‌شود. اگر تیم حاکم امتیازی را که تعهد کرده، یا بیشتر از آن امتیاز را گرفته باشد، همان عدد امتیاز او خواهد بود. اما اگر کمتر از آن امتیاز تعهد شده باشد، منفی آن (امتیاز تعهد شده) را دریافت خواهد کرد. تیم رقیب هم هر اندازه که امتیاز بگیرد برایش منظور خواهد شد.</p>
+
+                    <h4>قوانین ویژه</h4>
+                    <p><strong>قانون شلم:</strong> اگر تیم حاکم موفق به جمع کردن کلیه برگ‌ها شود، می‌گویند «شلم» کرده است. در چنین حالتی به جای ۱۶۵ امتیاز، دو برابر مقدار تعهد، امتیاز خواهد برد. مشخص است که تیم حاکم هرگز شلم نمی‌شود، زیرا در اول بازی فرد حاکم چهار برگ را به عنوان برده از دست خود خارج می‌کند.</p>
+                    <p><strong>قانون یاسا:</strong> اگر امتیاز تیم حاکم از تیم رقیب کمتر شود، یعنی کمتر از ۸۵ امتیاز، تیم حاکم یاسا می‌شود و به جای اینکه به تعداد امتیاز تعهد شده منفی بگیرد، دو برابر امتیاز تعهدشده را منفی می‌گیرد.</p>
+                    
+                    <h4>پایان بازی</h4>
+                    <p>معمولاً بازی شلم تا امتیاز ۱۱۶۵ بازی می‌شود اما با توافق بازیکنان، در آغاز بازی می‌توان آن را تغییر داد. امتیازهای ۶۶۰ و ۳۳۰ امتیازات معمولی هستند که می‌توانند جایگزین عدد ۱۱۶۵ شوند.</p>
+
+                    <h4>خلاصه امتیازدهی</h4>
+                    <ul>
+                        <li>هر دست برده شده: ۵ امتیاز</li>
+                        <li>هر ۵ لو: ۵ امتیاز</li>
+                        <li>هر ۱۰ لو: ۱۰ امتیاز</li>
+                        <li>هر تک (آس): ۱۰ امتیاز</li>
+                        <li>مجموع کل امتیازات یک بازی: ۱۶۵ امتیاز</li>
+                    </ul>
+
+                    <h3 id="badges-section-title">نشان‌ها</h3>
+                    <div id="badges-list-in-rules"><div class="badges-rules-grid">
+                <div class="badge-rule-item">
+                    <span class="badge-chip badge-hakem" data-badge-id="shelem_kar">شلم‌کار</span>
+                    <p>حاکمی که توانسته حداقل یک بار شلم کند.</p>
+                </div>
+            
+                <div class="badge-rule-item">
+                    <span class="badge-chip badge-hakem" data-badge-id="shelem_kar_azam">شلم‌کار اعظم</span>
+                    <p>حاکمی که در مجموع دست‌هایی که شلم کرده، بیشترین امتیاز را برای تیمش گرفته است. (این نشان فقط در صورتی اهدا می‌شود که بیش از یک نفر نشان «شلم‌کار» را داشته باشند.)</p>
+                </div>
+            
+                <div class="badge-rule-item">
+                    <span class="badge-chip badge-hakem" data-badge-id="manfi_khor">منفی‌خور</span>
+                    <p>حاکمی که حداقل یک بار منفی خورده است.</p>
+                </div>
+            
+                <div class="badge-rule-item">
+                    <span class="badge-chip badge-hakem" data-badge-id="manfi_khor_azam">منفی‌خور اعظم</span>
+                    <p>حاکمی که در مجموع دست‌هایی که منفی خورده بیشترین امتیاز منفی را گرفته است. (این نشان فقط در صورتی اهدا می‌شود که بیش از یک نفر نشان «منفی‌خور» را داشته باشند.)</p>
+                </div>
+            
+                <div class="badge-rule-item">
+                    <span class="badge-chip badge-hakem" data-badge-id="yasa_khor">یاساخور</span>
+                    <p>حاکمی که حداقل یک بار یاسا شده است.</p>
+                </div>
+            
+                <div class="badge-rule-item">
+                    <span class="badge-chip badge-hakem" data-badge-id="yasa_khor_azam">یاساخور اعظم</span>
+                    <p>حاکمی که در زمان‌های یاسا خوردن بیشترین امتیاز منفی را گرفته. (این نشان فقط در صورتی اهدا می‌شود که بیش از یک نفر نشان «یاساخور» را داشته باشند.)</p>
+                </div>
+            
+                <div class="badge-rule-item">
+                    <span class="badge-chip badge-hakem" data-badge-id="agha_balatar">آقا بالاتر</span>
+                    <p>کسی که در بین دست‌های موفق، بیشترین امتیاز را تعهد کرده. (به شرط تعهد بالای ۱۳۰ و منحصر به فرد بودن)</p>
+                </div>
+            
+                <div class="badge-rule-item">
+                    <span class="badge-chip badge-hakem" data-badge-id="gonde_gooz_azam">گنده‌گوز اعظم</span>
+                    <p>تنها حاکمی که در بین دست‌های ناموفق بالاترین تعهد را داشته و تعهدش از ۱۳۵ بیشتر بوده است.</p>
+                </div>
+            
+                <div class="badge-rule-item">
+                    <span class="badge-chip badge-hakem" data-badge-id="khoshshans_milimetri">خوش‌شانس میلی‌متری</span>
+                    <p>کسی که در میانگین دفعاتی که حکومت موفق داشته با کمترین اختلاف (کمتر از ۱۰) نسبت به مقدار تعهد خود برنده شده است.</p>
+                </div>
+            
+                <div class="badge-rule-item">
+                    <span class="badge-chip badge-hakem" data-badge-id="mazad_chi">مازادچی</span>
+                    <p>کسی که در میانگین دفعاتی که حکومت موفق داشته با بیشترین اختلاف (بیشتر از ۳۰) نسبت به مقدار تعهد خود برنده شده.</p>
+                </div>
+            
+                <div class="badge-rule-item">
+                    <span class="badge-chip badge-hakem" data-badge-id="badshans_milimetri">بدشانس میلی‌متری</span>
+                    <p>کسی که در میانگین دفعاتی که حکومت ناموفق داشته با کمترین اختلاف (کمتر از ۱۰) نسبت به مقدار تعهد خود بازنده شده.</p>
+                </div>
+            
+                <div class="badge-rule-item">
+                    <span class="badge-chip badge-hakem" data-badge-id="doshman_shad_kon">دشمن‌شادکن</span>
+                    <p>کسی که در مجموع دفعاتی که حاکم بوده، بیشتر از اینکه برای تیمش سود داشته باشد، ضرر زده است.</p>
+                </div>
+            
+                <div class="badge-rule-item">
+                    <span class="badge-chip badge-hakem" data-badge-id="del_chi">دل‌چی</span>
+                    <p>برای هر کس که بیش از ۳ بار حاکم شده و بیش از نصف دفعاتی که حاکم شده خال دل را حکم کرده است.</p>
+                </div>
+            
+                <div class="badge-rule-item">
+                    <span class="badge-chip badge-hakem" data-badge-id="gishniz_chi">گشنیزچی</span>
+                    <p>برای هر کس که بیش از ۳ بار حاکم شده و حداقل نصف دفعاتی که حاکم شده خال گشنیز را حکم کرده است.</p>
+                </div>
+            
+                <div class="badge-rule-item">
+                    <span class="badge-chip badge-hakem" data-badge-id="pik_chi">پیک‌چی</span>
+                    <p>برای هر کس که بیش از ۳ بار حاکم شده و حداقل نصف دفعاتی که حاکم شده خال پیک را حکم کرده است.</p>
+                </div>
+            
+                <div class="badge-rule-item">
+                    <span class="badge-chip badge-hakem" data-badge-id="khesht_chi">خشت‌چی</span>
+                    <p>برای هر کس که بیش از ۳ بار حاکم شده و حداقل نصف دفعاتی که حاکم شده خال خشت را حکم کرده است.</p>
+                </div>
+            
+                <div class="badge-rule-item">
+                    <span class="badge-chip badge-hakem" data-badge-id="soltan_hearts">سلطان ♥</span>
+                    <p>کسی که بیشتر از حاکمان دیگر (و حداقل ۳ بار) خال دل را به عنوان حکم انتخاب کرده است.</p>
+                </div>
+            
+                <div class="badge-rule-item">
+                    <span class="badge-chip badge-hakem" data-badge-id="soltan_spades">سلطان ♠</span>
+                    <p>کسی که بیشتر از حاکمان دیگر (و حداقل ۳ بار) خال پیک را به عنوان حکم انتخاب کرده است.</p>
+                </div>
+            
+                <div class="badge-rule-item">
+                    <span class="badge-chip badge-hakem" data-badge-id="soltan_clubs">سلطان ♣</span>
+                    <p>کسی که بیشتر از حاکمان دیگر (و حداقل ۳ بار) خال گشنیز را به عنوان حکم انتخاب کرده است.</p>
+                </div>
+            
+                <div class="badge-rule-item">
+                    <span class="badge-chip badge-hakem" data-badge-id="soltan_diamonds">سلطان ♦</span>
+                    <p>کسی که بیشتر از حاکمان دیگر (و حداقل ۳ بار) خال خشت را به عنوان حکم انتخاب کرده است.</p>
+                </div>
+            
+                <div class="badge-rule-item">
+                    <span class="badge-chip badge-hakem" data-badge-id="nim_soltan_hearts">نیم‌سلطان ♥</span>
+                    <p>به همراه دیگران، بیشترین تعداد حکم دل را (حداقل ۳ بار) داشته است.</p>
+                </div>
+            
+                <div class="badge-rule-item">
+                    <span class="badge-chip badge-hakem" data-badge-id="nim_soltan_spades">نیم‌سلطان ♠</span>
+                    <p>به همراه دیگران، بیشترین تعداد حکم پیک را (حداقل ۳ بار) داشته است.</p>
+                </div>
+            
+                <div class="badge-rule-item">
+                    <span class="badge-chip badge-hakem" data-badge-id="nim_soltan_clubs">نیم‌سلطان ♣</span>
+                    <p>به همراه دیگران، بیشترین تعداد حکم گشنیز را (حداقل ۳ بار) داشته است.</p>
+                </div>
+            
+                <div class="badge-rule-item">
+                    <span class="badge-chip badge-hakem" data-badge-id="nim_soltan_diamonds">نیم‌سلطان ♦</span>
+                    <p>به همراه دیگران، بیشترین تعداد حکم خشت را (حداقل ۳ بار) داشته است.</p>
+                </div>
+            
+                <div class="badge-rule-item">
+                    <span class="badge-chip badge-hakem" data-badge-id="super_hakem">سوپر حاکم</span>
+                    <p>کسی که حداقل سه بار حاکم بوده و در مجموع دفعاتی که حاکم شده بیشترین امتیاز را گرفته است.</p>
+                </div>
+            
+                <div class="badge-rule-item">
+                    <span class="badge-chip badge-hakem" data-badge-id="super_manfi_khor">سوپر منفی‌خور</span>
+                    <p>کسی که حداقل سه بار حاکم بوده و در مجموع کمترین امتیاز (منفی) را کسب کرده است.</p>
+                </div>
+            
+                <div class="badge-rule-item">
+                    <span class="badge-chip badge-dealer" data-badge-id="dast_tala">دست طلا</span>
+                    <p>تنها کسی که حداقل سه بار دست داده و در مجموع تفاضل امتیاز تیمش از حریف مثبت و بیشترین بوده است.</p>
+                </div>
+            
+                <div class="badge-rule-item">
+                    <span class="badge-chip badge-dealer" data-badge-id="dast_siah">دست‌سیاه</span>
+                    <p>تنها کسی که حداقل سه بار دست داده و در مجموع تفاضل امتیاز تیمش از حریف منفی و کمترین بوده است.</p>
+                </div>
+            
+                <div class="badge-rule-item">
+                    <span class="badge-chip badge-team" data-badge-id="be_khodet_bia">به خودت بیا!</span>
+                    <p>تیمی که امتیازش از تیم حریف کمتر است و اختلاف امتیازها بیشتر از ۳۵ درصد هدف بازی است.</p>
+                </div>
+            
+                <div class="badge-rule-item">
+                    <span class="badge-chip badge-team" data-badge-id="shoma_mitoonid">شما می‌تونید!</span>
+                    <p>تیمی که قبلا نشان «به خودت بیا» داشته، اما حالا فاصله‌اش با حریف کم شده.</p>
+                </div>
+            
+                <div class="badge-rule-item">
+                    <span class="badge-chip badge-team" data-badge-id="bazgasht_ghahremanane">بازگشت قهرمانانه</span>
+                    <p>تیمی که قبلا عقب بوده اما الان از حریف جلو افتاده است.</p>
+                </div>
+            </div></div>
+                </div>
+            </div>
+
+             <!-- History Page -->
+            <div id="history-page" class="page">
+                <!-- Hand history will be injected here -->
+            </div>
+            
+            <p class="app-credit-footer">این اپ با ❤ و Vibe Coding توسط میلاد فراهانی ساخته شده است.</p>
+        </main>
+
+        <!-- Footer Menu -->
+        <footer id="footer-menu" class="footer-nav" style="display: flex;">
+            <button class="nav-btn" id="rules-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                <span>قوانین بازی</span>
+            </button>
+            <label for="import-file" class="nav-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                <span>ورود اطلاعات</span>
+                <input type="file" id="import-file" accept=".json" style="display: none;">
+            </label>
+            <button class="nav-btn" id="export-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                <span>دانلود خروجی</span>
+            </button>
+        </footer>
+    </div>
+
+    <!-- Modal Container -->
+    <div id="modal-container" class="modal-wrapper hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <!-- Modal content will be injected here -->
+        </div>
+    </div>
+
+    <script src="./script.js"></script>
+
+
+<script>
+if ("serviceWorker" in navigator) { window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(()=>{})); }
+</script>
+</body></html>
