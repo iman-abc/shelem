@@ -28,8 +28,8 @@
                 <h1>شلم</h1>
                 <p>ثبت امتیازات بازی شلم</p>
             </div>
-        <button id="lock-btn" aria-label="قفل برنامه">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+        <button id="user-btn" aria-label="حساب کاربری">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
             </button>
             <button id="theme-toggle" aria-label="تغییر تم">
                 <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
@@ -76,6 +76,7 @@
                                 <tr class="r-bad"><th>یاسا</th><td>امتیاز حاکم &lt; ۸۵ (یعنی حریف بیشتر از ۸۰ گرفته) و تعهد کمتر از ۱۶۵ ⟵ حاکم <b>−۲×تعهد</b> می‌گیرد</td></tr>
                                 <tr class="r-ok"><th>شلم (حاکم همهٔ ۱۶۵ را ببرد)</th><td>تعهد معمولی: حاکم <b>۲×تعهد</b> می‌برد · تعهد «شلم»: <b>۳۳۰</b> · تعهد «سرشلم»: <b>۶۶۰</b> · امتیاز حریف <b>۰</b></td></tr>
                                 <tr class="r-bad"><th>تعهد ۳۳۰ یا ۶۶۰ ناموفق</th><td>حاکم −۳۳۰ یا −۶۶۰ می‌گیرد (یاسا ندارد)؛ حریف امتیاز خودش را می‌برد</td></tr>
+                                <tr class="r-bad"><th>قانون بالای ۱۰۰۰ (قفل شدن تیم)</th><td>وقتی امتیاز یک تیم از <b>۱۰۰۰</b> بیشتر شد (برای سقف‌های ۳۳۰/۶۶۰ به‌نسبت کمتر)، آن تیم وقتی <b>حاکم نیست</b> و حاکمِ حریف موفق شود، امتیازی که گرفته <b>حساب نمی‌شود (۰)</b>. این تیم فقط به دو راه امتیاز می‌گیرد: <b>۱)</b> خودش حاکم شود و موفق شود (امتیازش اضافه می‌شود و می‌تواند برنده شود) <b>۲)</b> حاکمِ حریف را <b>منفی‌ بزند</b> (حاکم حریف به تعهدش نرسد) که در این حالت امتیاز خودش حساب می‌شود.</td></tr>
                                 <tr><th>سقف امتیاز بازی</th><td>۳۳۰ ، ۶۶۰ ، ۱۱۶۵ (پیش‌فرض) یا عدد دلخواه</td></tr>
                                 <tr><th>پایان بازی</th><td>بعد از هر دست اگر امتیاز یکی از تیم‌ها به سقف رسید بازی تمام می‌شود؛ تیمی که امتیاز بیشتری دارد برنده است</td></tr>
                                 <tr><th>تیم‌ها</th><td>بازیکن ۱ و ۳ هم‌تیمی‌اند؛ بازیکن ۲ و ۴ هم‌تیمی‌اند</td></tr>
@@ -284,7 +285,7 @@
                 <!-- Hand history will be injected here -->
             </div>
             
-            <p class="app-credit-footer">توسعه و طراحی: <a href="https://github.com/iman-abc" target="_blank" rel="noopener">iman-abc</a><br><span>بر پایهٔ ایدهٔ اپ «ثبت امتیازات شلم» از میلاد فراهانی</span></p>
+            <p class="app-credit-footer">توسعه و طراحی: <a href="https://github.com/iman-abc" target="_blank" rel="noopener">iman-abc</a></p>
             <p class="offline-dl"><a href="./shelem-offline.html" download="shelem-offline.html">⬇ دانلود نسخهٔ آفلاین (یک فایل، بدون نیاز به اینترنت)</a></p>
         </main>
 
@@ -314,7 +315,8 @@
         </div>
     </div>
 
-    <script src="./lock.js"></script>
+    <script src="./config.js"></script>
+    <script src="./auth.js"></script>
     <script src="./script.js"></script>
 
 

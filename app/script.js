@@ -13,17 +13,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     moment.locale('fa');
 
+    const STORAGE_KEY = window.SHELEM_STORAGE_KEY || 'shelem-app-state';
     const db = {
-        save: () => {
+        persist: () => {
             try {
                 const { history, modalStack, ...stateToSave } = state;
-                localStorage.setItem('shelem-app-state', JSON.stringify(stateToSave));
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
             } catch (e) {
                 console.error("Error saving to localStorage", e);
             }
         },
+        save: () => { db.persist(); window.ShelemSync && window.ShelemSync.notify(); },
         load: () => {
-            const savedState = localStorage.getItem('shelem-app-state');
+            const savedState = localStorage.getItem(STORAGE_KEY);
             if (savedState) {
                 try {
                     const parsedState = JSON.parse(savedState);
@@ -35,6 +37,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
+    };
+
+    // Bridge used by auth.js to merge games coming from the server
+    window.ShelemBridge = {
+        getGames: () => state.games,
+        setGames: (games) => {
+            state.games = games;
+            db.persist();
+            const cur = state.history[state.history.length - 1];
+            if (!cur || cur.page === 'home-page') renderHomePage();
+            else if (cur.page === 'game-page' && cur.context && !state.games.some(g => g.id === cur.context.gameId)) { state.history = [{ page: 'home-page', context: null }]; updateUI('home-page'); }
+        },
     };
 
     // --- THEME ---
@@ -528,6 +542,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const isShelem = hand.hakemScore === 165;
                 const isYasa = hakemScore < 0 && hand.hakemScore < 85 && hand.commitment < 165;
 
+                const lockNote = hand.lockedZero ? `<div class="lock-note">🔒 امتیاز حریف (${toPersianDigits(hand.nonHakemScore)}) حساب نشد: حریف بالای ${toPersianDigits(lockThreshold(game))} بود و حاکم موفق شد.</div>` : '';
                 if (isShelem) {
                     specialEventText = ' (شلم)';
                     cardStatusClass += ' shelem';
@@ -568,6 +583,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             </div>
                             ${index === game.hands.length - 1 ? `<button class="btn edit-btn" data-hand-index="${index}">ویرایش</button>` : ''}
                         </div>
+                        ${lockNote}
                         ${badgeChangesHTML}
                     </div>
                 `;
@@ -1217,6 +1233,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
             <p class="modal-sub">حاکم: <strong>${game.players[hand.hakem]}</strong> · تعهد: <strong>${commitLabel}</strong></p>
             ${hand.commitment <= 165 ? `<p class="fail-threshold">اگر حریف ${toPersianDigits(failAt)} یا بیشتر بگیرد، حاکم منفی می‌خورد</p>` : ''}
+            ${isLocked(game, nonHakemTeam) ? `<p class="fail-threshold" style="color:var(--primary-color)">🔒 تیم حریف بالای ${toPersianDigits(lockThreshold(game))} است؛ امتیازش فقط وقتی حساب می‌شود که حاکم منفی بخورد.</p>` : ''}
             <p class="modal-sub">حکم (اختیاری)</p>
             <div class="suit-chips">${suitChips}</div>
             <p class="modal-sub" style="margin-bottom:.5rem">تیم ${nonHakemPlayers.join(' و ')} چند امتیاز گرفتند؟</p>
@@ -1272,8 +1289,9 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.button-grid .grid-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const score = parseInt(e.currentTarget.dataset.score);
-                    const scores = calculateHandScores(hand.commitment, score);
                     const hakemTeam = getTeam(game, hand.hakem);
+                    const scores = calculateHandScores(hand.commitment, score, isLocked(game, getOppositeTeam(game, hand.hakem), handIndex));
+                    game.hands[handIndex].lockedZero = scores.lockedZero;
                     
                     game.hands[handIndex].scores = {
                         team1: hakemTeam === 'team1' ? scores.hakem : scores.nonHakem,
@@ -1304,30 +1322,38 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     
     // --- GAME LOGIC ---
-    const calculateHandScores = (commitment, nonHakemScore) => {
+    // Team total above this (scaled from 1000 for the 1165 target) is "locked":
+    // as the non-hakem team it can only gain points if the opponent hakem fails (manfi).
+    const lockThreshold = (game) => Math.floor((1000 * game.targetScore / 1165) / 5) * 5;
+    const teamTotalBefore = (game, team, upTo) => game.hands.slice(0, upTo).reduce((acc, h) => acc + h.scores[team], 0);
+    const isLocked = (game, team, upTo = game.hands.length) => teamTotalBefore(game, team, upTo) > lockThreshold(game);
+
+    const calculateHandScores = (commitment, nonHakemScore, nonHakemLocked = false) => {
         const hakemScore = 165 - nonHakemScore;
         let finalHakemScore = 0;
         let finalNonHakemScore = nonHakemScore;
+        let lockedZero = false;
 
         if (commitment === 330 && hakemScore === 165) { // Shelem
             finalHakemScore = 330;
             finalNonHakemScore = 0;
         } else if (commitment === 660 && hakemScore === 165) { // SarShelem
-             finalHakemScore = 660;
-             finalNonHakemScore = 0;
+            finalHakemScore = 660;
+            finalNonHakemScore = 0;
         } else if (hakemScore === 165) { // Unannounced Shelem
             finalHakemScore = commitment * 2;
             finalNonHakemScore = 0;
         } else if (hakemScore >= commitment) { // Successful bid
             finalHakemScore = hakemScore;
-        } else { // Failed bid
+            if (nonHakemLocked && nonHakemScore > 0) { finalNonHakemScore = 0; lockedZero = true; }
+        } else { // Failed bid (manfi)
             if (hakemScore < 85 && commitment < 165) { // Yasa
                 finalHakemScore = -2 * commitment;
             } else {
                 finalHakemScore = -commitment;
             }
         }
-        return { hakem: finalHakemScore, nonHakem: finalNonHakemScore };
+        return { hakem: finalHakemScore, nonHakem: finalNonHakemScore, lockedZero };
     };
 
     const calculateAndRecordScores = (gameId, nonHakemScore) => {
@@ -1336,10 +1362,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const hakemTeam = getTeam(game, currentHand.hakem);
         const nonHakemTeam = getOppositeTeam(game, currentHand.hakem);
 
-        const scores = calculateHandScores(currentHand.commitment, nonHakemScore);
+        const scores = calculateHandScores(currentHand.commitment, nonHakemScore, isLocked(game, nonHakemTeam));
 
         const handResult = {
             ...currentHand,
+            lockedZero: scores.lockedZero,
             hakemScore: 165 - nonHakemScore,
             nonHakemScore: nonHakemScore,
             scores: { team1: 0, team2: 0 }

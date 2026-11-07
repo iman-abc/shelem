@@ -147,13 +147,13 @@ main, main.header-scrolled { padding-top: calc(var(--header-height) + 1rem) !imp
 .app-credit-footer a { color: var(--primary-color); text-decoration: none; font-weight: 600; }
 .app-credit-footer span { opacity: .8; }
 .app-credit-footer { text-align: center; margin: 1.5rem 0 5rem; line-height: 1.9; }
-#lock-btn {
+#user-btn {
     position: absolute; left: 3.25rem; top: 50%; transform: translateY(-50%);
     background: transparent; border: 0; color: var(--text-color); cursor: pointer;
     width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center;
 }
-#lock-btn:hover { background: var(--surface-2); }
-#lock-btn.on { color: var(--success-color); }
+#user-btn:hover { background: var(--surface-2); }
+#user-btn.on { color: var(--success-color); }
 .lock-overlay {
     position: fixed; inset: 0; z-index: 10000; background: var(--background-color); color: var(--text-color);
     display: grid; place-items: center; padding: 1.5rem; font-family: var(--font-family); direction: rtl;
@@ -168,3 +168,27 @@ main, main.header-scrolled { padding-top: calc(var(--header-height) + 1rem) !imp
 .lock-err { color: var(--danger-color); font-size: .85rem; min-height: 1.2em; }
 .offline-dl { text-align: center; margin: -3.5rem 0 5rem; font-size: .85rem; }
 .offline-dl a { color: var(--primary-color); }
+
+/* --- Vazirmatn everywhere (form controls don't inherit by default) --- */
+html, body, button, input, textarea, select, .lock-box, .modal-content { font-family: 'Vazirmatn', system-ui, sans-serif !important; }
+
+/* --- Back button: visible, on the start side (right in RTL), arrow flipped --- */
+.back-btn {
+    left: auto !important; right: .5rem !important;
+    color: var(--text-color) !important;
+    transform: translateY(-50%) scaleX(-1) !important;
+    width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; z-index: 2;
+}
+.back-btn:hover { background: var(--surface-2); }
+.back-btn.hidden { display: none !important; }
+.app-header .header-content { padding: 0 3rem; }
+
+/* --- Sync status dot on the user button --- */
+#user-btn { position: absolute; }
+#user-btn::after { content: ''; position: absolute; bottom: 7px; right: 7px; width: 9px; height: 9px; border-radius: 50%; background: var(--text-muted); border: 2px solid var(--surface); }
+#user-btn[data-sync="ok"]::after { background: var(--success-color); }
+#user-btn[data-sync="syncing"]::after, #user-btn[data-sync="pending"]::after { background: #f59e0b; }
+#user-btn[data-sync="error"]::after { background: var(--danger-color); }
+#user-btn[data-sync="offline"]::after { background: var(--text-muted); }
+#user-btn[data-sync="local"]::after { display: none; }
+.lock-note { margin: .5rem .75rem .75rem; padding: .45rem .7rem; font-size: .8rem; border-radius: 10px; background: var(--primary-soft); color: var(--text-color); }

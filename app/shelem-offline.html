@@ -1122,13 +1122,13 @@ main, main.header-scrolled { padding-top: calc(var(--header-height) + 1rem) !imp
 .app-credit-footer a { color: var(--primary-color); text-decoration: none; font-weight: 600; }
 .app-credit-footer span { opacity: .8; }
 .app-credit-footer { text-align: center; margin: 1.5rem 0 5rem; line-height: 1.9; }
-#lock-btn {
+#user-btn {
     position: absolute; left: 3.25rem; top: 50%; transform: translateY(-50%);
     background: transparent; border: 0; color: var(--text-color); cursor: pointer;
     width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center;
 }
-#lock-btn:hover { background: var(--surface-2); }
-#lock-btn.on { color: var(--success-color); }
+#user-btn:hover { background: var(--surface-2); }
+#user-btn.on { color: var(--success-color); }
 .lock-overlay {
     position: fixed; inset: 0; z-index: 10000; background: var(--background-color); color: var(--text-color);
     display: grid; place-items: center; padding: 1.5rem; font-family: var(--font-family); direction: rtl;
@@ -1143,6 +1143,30 @@ main, main.header-scrolled { padding-top: calc(var(--header-height) + 1rem) !imp
 .lock-err { color: var(--danger-color); font-size: .85rem; min-height: 1.2em; }
 .offline-dl { text-align: center; margin: -3.5rem 0 5rem; font-size: .85rem; }
 .offline-dl a { color: var(--primary-color); }
+
+/* --- Vazirmatn everywhere (form controls don't inherit by default) --- */
+html, body, button, input, textarea, select, .lock-box, .modal-content { font-family: 'Vazirmatn', system-ui, sans-serif !important; }
+
+/* --- Back button: visible, on the start side (right in RTL), arrow flipped --- */
+.back-btn {
+    left: auto !important; right: .5rem !important;
+    color: var(--text-color) !important;
+    transform: translateY(-50%) scaleX(-1) !important;
+    width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; z-index: 2;
+}
+.back-btn:hover { background: var(--surface-2); }
+.back-btn.hidden { display: none !important; }
+.app-header .header-content { padding: 0 3rem; }
+
+/* --- Sync status dot on the user button --- */
+#user-btn { position: absolute; }
+#user-btn::after { content: ''; position: absolute; bottom: 7px; right: 7px; width: 9px; height: 9px; border-radius: 50%; background: var(--text-muted); border: 2px solid var(--surface); }
+#user-btn[data-sync="ok"]::after { background: var(--success-color); }
+#user-btn[data-sync="syncing"]::after, #user-btn[data-sync="pending"]::after { background: #f59e0b; }
+#user-btn[data-sync="error"]::after { background: var(--danger-color); }
+#user-btn[data-sync="offline"]::after { background: var(--text-muted); }
+#user-btn[data-sync="local"]::after { display: none; }
+.lock-note { margin: .5rem .75rem .75rem; padding: .45rem .7rem; font-size: .8rem; border-radius: 10px; background: var(--primary-soft); color: var(--text-color); }
 
 </style>
     <style>
@@ -1302,8 +1326,8 @@ var moment;moment=(()=>{var e={6365:(e,t,a)=>{e.exports=A;var s=a(381);a(6959);v
                 <h1>شلم</h1>
                 <p>ثبت امتیازات بازی شلم</p>
             </div>
-        <button id="lock-btn" aria-label="قفل برنامه">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+        <button id="user-btn" aria-label="حساب کاربری">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
             </button>
             <button id="theme-toggle" aria-label="تغییر تم">
                 <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
@@ -1350,6 +1374,7 @@ var moment;moment=(()=>{var e={6365:(e,t,a)=>{e.exports=A;var s=a(381);a(6959);v
                                 <tr class="r-bad"><th>یاسا</th><td>امتیاز حاکم &lt; ۸۵ (یعنی حریف بیشتر از ۸۰ گرفته) و تعهد کمتر از ۱۶۵ ⟵ حاکم <b>−۲×تعهد</b> می‌گیرد</td></tr>
                                 <tr class="r-ok"><th>شلم (حاکم همهٔ ۱۶۵ را ببرد)</th><td>تعهد معمولی: حاکم <b>۲×تعهد</b> می‌برد · تعهد «شلم»: <b>۳۳۰</b> · تعهد «سرشلم»: <b>۶۶۰</b> · امتیاز حریف <b>۰</b></td></tr>
                                 <tr class="r-bad"><th>تعهد ۳۳۰ یا ۶۶۰ ناموفق</th><td>حاکم −۳۳۰ یا −۶۶۰ می‌گیرد (یاسا ندارد)؛ حریف امتیاز خودش را می‌برد</td></tr>
+                                <tr class="r-bad"><th>قانون بالای ۱۰۰۰ (قفل شدن تیم)</th><td>وقتی امتیاز یک تیم از <b>۱۰۰۰</b> بیشتر شد (برای سقف‌های ۳۳۰/۶۶۰ به‌نسبت کمتر)، آن تیم وقتی <b>حاکم نیست</b> و حاکمِ حریف موفق شود، امتیازی که گرفته <b>حساب نمی‌شود (۰)</b>. این تیم فقط به دو راه امتیاز می‌گیرد: <b>۱)</b> خودش حاکم شود و موفق شود (امتیازش اضافه می‌شود و می‌تواند برنده شود) <b>۲)</b> حاکمِ حریف را <b>منفی‌ بزند</b> (حاکم حریف به تعهدش نرسد) که در این حالت امتیاز خودش حساب می‌شود.</td></tr>
                                 <tr><th>سقف امتیاز بازی</th><td>۳۳۰ ، ۶۶۰ ، ۱۱۶۵ (پیش‌فرض) یا عدد دلخواه</td></tr>
                                 <tr><th>پایان بازی</th><td>بعد از هر دست اگر امتیاز یکی از تیم‌ها به سقف رسید بازی تمام می‌شود؛ تیمی که امتیاز بیشتری دارد برنده است</td></tr>
                                 <tr><th>تیم‌ها</th><td>بازیکن ۱ و ۳ هم‌تیمی‌اند؛ بازیکن ۲ و ۴ هم‌تیمی‌اند</td></tr>
@@ -1558,7 +1583,7 @@ var moment;moment=(()=>{var e={6365:(e,t,a)=>{e.exports=A;var s=a(381);a(6959);v
                 <!-- Hand history will be injected here -->
             </div>
             
-            <p class="app-credit-footer">توسعه و طراحی: <a href="https://github.com/iman-abc" target="_blank" rel="noopener">iman-abc</a><br><span>بر پایهٔ ایدهٔ اپ «ثبت امتیازات شلم» از میلاد فراهانی</span></p>
+            <p class="app-credit-footer">توسعه و طراحی: <a href="https://github.com/iman-abc" target="_blank" rel="noopener">iman-abc</a></p>
             
         </main>
 
@@ -1589,134 +1614,248 @@ var moment;moment=(()=>{var e={6365:(e,t,a)=>{e.exports=A;var s=a(381);a(6959);v
     </div>
 
     <script>
-/* App lock (optional password) + persistent local storage.
-   NOTE: this is a screen lock for casual access on a shared device. Game data stays in this
-   browser's localStorage and is not encrypted. */
+/* Server settings (Supabase). The anon key is PUBLIC by design - it is safe to commit.
+   Leave both empty to run in local-only mode (no login, no server sync).
+   Fill them from: Supabase -> Project Settings -> API. */
+window.SHELEM_CONFIG = {
+    supabaseUrl: '',   // e.g. 'https://abcdxyz.supabase.co'
+    anonKey: ''        // the "anon public" key
+};
+
+</script>
+    <script>
+/* Login, user management (admin) and per-user server sync. Works offline after the first login. */
 (function () {
-    const LOCK_KEY = 'shelem-lock';
-    const SESSION_KEY = 'shelem-unlocked';
-    const AUTO_LOCK_MS = 5 * 60 * 1000;
-    const hasCrypto = !!(window.crypto && crypto.subtle);
-    const enc = new TextEncoder();
-    const b64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)));
-    const unb64 = (s) => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+    const cfg = window.SHELEM_CONFIG || {};
+    const configured = !!(cfg.supabaseUrl && cfg.anonKey);
+    const SESSION_KEY = 'shelem-session';
+    const $ = (s, r = document) => r.querySelector(s);
+    const readJSON = (k) => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } };
 
-    const derive = async (password, saltBytes, iter) => {
-        const key = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']);
-        return b64(await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: saltBytes, iterations: iter, hash: 'SHA-256' }, key, 256));
-    };
-    const getLock = () => { try { return JSON.parse(localStorage.getItem(LOCK_KEY)); } catch { return null; } };
-    const setPassword = async (pw) => {
-        const salt = crypto.getRandomValues(new Uint8Array(16));
-        const iter = 150000;
-        localStorage.setItem(LOCK_KEY, JSON.stringify({ salt: b64(salt), iter, hash: await derive(pw, salt, iter) }));
-    };
-    const verify = async (pw) => {
-        const l = getLock();
-        if (!l) return true;
-        return (await derive(pw, unb64(l.salt), l.iter)) === l.hash;
-    };
+    let session = configured ? readJSON(SESSION_KEY) : null;
+    // Each user gets their own saved games on this device.
+    window.SHELEM_STORAGE_KEY = (configured && session) ? 'shelem-app-state:' + session.username : 'shelem-app-state';
 
-    // ---- overlay dialog helper ----
+    // ---------- server calls ----------
+    const ERR = {
+        invalid_credentials: 'نام کاربری یا رمز اشتباه است', unauthorized: 'نشست شما منقضی شده است',
+        forbidden: 'دسترسی ندارید', username_taken: 'این نام کاربری قبلاً ثبت شده است',
+        username_too_short: 'نام کاربری باید حداقل ۳ حرف باشد', password_too_short: 'رمز باید حداقل ۶ حرف باشد',
+        cannot_disable_self: 'نمی‌توانید خودتان را غیرفعال کنید', network: 'اتصال به اینترنت/سرور برقرار نیست',
+    };
+    const rpc = async (fn, args = {}) => {
+        let res;
+        try {
+            res = await fetch(`${cfg.supabaseUrl.replace(/\/$/, '')}/rest/v1/rpc/${fn}`, {
+                method: 'POST',
+                headers: Object.assign({ 'Content-Type': 'application/json', apikey: cfg.anonKey }, cfg.anonKey.startsWith('eyJ') ? { Authorization: 'Bearer ' + cfg.anonKey } : {}),
+                body: JSON.stringify(args),
+            });
+        } catch { const e = new Error(ERR.network); e.code = 'network'; throw e; }
+        const text = await res.text();
+        let body = null; try { body = text ? JSON.parse(text) : null; } catch {}
+        if (!res.ok) {
+            const msg = (body && (body.message || body.hint || '')) || '';
+            const code = Object.keys(ERR).find(c => msg.includes(c)) || 'server';
+            const e = new Error(ERR[code] || ('خطای سرور: ' + (msg || res.status))); e.code = code; throw e;
+        }
+        return body;
+    };
+    const tok = () => session && session.token;
+
+    // ---------- overlay UI ----------
     let overlay = null;
-    const closeOverlay = () => { overlay?.remove(); overlay = null; document.body.style.overflow = ''; };
-    const dialog = (html, { dismissible = true } = {}) => {
-        closeOverlay();
+    const close = () => { overlay?.remove(); overlay = null; document.body.style.overflow = ''; };
+    const dialog = (html, dismissible = true) => {
+        close();
         overlay = document.createElement('div');
         overlay.className = 'lock-overlay';
-        overlay.innerHTML = `<div class="lock-box">${html}${dismissible ? '<button data-x>انصراف</button>' : ''}</div>`;
+        overlay.innerHTML = `<div class="lock-box">${html}${dismissible ? '<button data-x>بستن</button>' : ''}</div>`;
         document.body.appendChild(overlay);
         document.body.style.overflow = 'hidden';
-        overlay.querySelector('[data-x]')?.addEventListener('click', closeOverlay);
+        $('[data-x]', overlay)?.addEventListener('click', close);
         return overlay;
     };
-    const err = (el, msg) => { el.querySelector('.lock-err').textContent = msg; };
+    const setErr = (el, m) => { $('.lock-err', el).textContent = m || ''; };
+    const busy = (btn, on) => { btn.disabled = on; btn.style.opacity = on ? .6 : 1; };
 
-    // ---- screens ----
-    const showUnlock = () => {
+    const showLogin = (note) => {
         const el = dialog(`
-            <h2>🔒 برنامه قفل است</h2><p>رمز عبور را وارد کنید</p>
-            <input type="password" id="lk-pw" autocomplete="current-password" autofocus>
+            <h2>ورود به شلم</h2><p>${note || 'با نام کاربری و رمز خود وارد شوید'}</p>
+            <input id="lg-u" placeholder="نام کاربری" autocomplete="username" autocapitalize="off" dir="ltr">
+            <input id="lg-p" type="password" placeholder="رمز عبور" autocomplete="current-password" dir="ltr">
             <div class="lock-err"></div>
-            <button class="primary" id="lk-ok">ورود</button>
-            <button class="danger" id="lk-reset">رمز را فراموش کرده‌ام (پاک‌کردن همهٔ اطلاعات)</button>`, { dismissible: false });
+            <button class="primary" id="lg-go">ورود</button>`, false);
         const go = async () => {
-            const pw = el.querySelector('#lk-pw').value;
-            if (await verify(pw)) { sessionStorage.setItem(SESSION_KEY, '1'); closeOverlay(); }
-            else { err(el, 'رمز اشتباه است'); el.querySelector('#lk-pw').select(); }
-        };
-        el.querySelector('#lk-ok').addEventListener('click', go);
-        el.querySelector('#lk-pw').addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
-        el.querySelector('#lk-reset').addEventListener('click', () => {
-            if (confirm('همهٔ بازی‌ها و رمز پاک می‌شود و قابل بازگشت نیست. ادامه می‌دهید؟')) {
-                localStorage.removeItem('shelem-app-state');
-                localStorage.removeItem(LOCK_KEY);
-                sessionStorage.removeItem(SESSION_KEY);
+            const u = $('#lg-u', el).value.trim(), p = $('#lg-p', el).value;
+            if (!u || !p) return setErr(el, 'نام کاربری و رمز را وارد کنید');
+            const b = $('#lg-go', el); busy(b, true); setErr(el, '');
+            try {
+                const r = await rpc('app_login', { p_username: u, p_password: p });
+                // first login on this device: adopt games saved before accounts existed
+                const key = 'shelem-app-state:' + r.username;
+                if (!localStorage.getItem(key) && !localStorage.getItem('shelem-adopted') && localStorage.getItem('shelem-app-state')) {
+                    localStorage.setItem(key, localStorage.getItem('shelem-app-state'));
+                    localStorage.setItem('shelem-adopted', r.username);
+                }
+                localStorage.setItem(SESSION_KEY, JSON.stringify({ token: r.token, username: r.username, is_admin: r.is_admin }));
                 location.reload();
-            }
-        });
-        setTimeout(() => el.querySelector('#lk-pw')?.focus(), 50);
+            } catch (e) { setErr(el, e.message); busy(b, false); }
+        };
+        $('#lg-go', el).addEventListener('click', go);
+        el.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+        setTimeout(() => $('#lg-u', el)?.focus(), 50);
     };
 
-    const showSet = (changing) => {
-        const el = dialog(`
-            <h2>${changing ? 'تغییر رمز' : 'تعیین رمز عبور'}</h2>
-            <p>رمز هنگام باز کردن برنامه پرسیده می‌شود. اگر فراموش شود، فقط با پاک‌کردن اطلاعات می‌توان وارد شد.</p>
-            ${changing ? '<input type="password" id="lk-old" placeholder="رمز فعلی" autocomplete="current-password">' : ''}
-            <input type="password" id="lk-new" placeholder="رمز جدید (حداقل ۴ حرف)" autocomplete="new-password">
-            <input type="password" id="lk-new2" placeholder="تکرار رمز جدید" autocomplete="new-password">
-            <div class="lock-err"></div>
-            <button class="primary" id="lk-save">ذخیره</button>`);
-        el.querySelector('#lk-save').addEventListener('click', async () => {
-            const nw = el.querySelector('#lk-new').value;
-            if (changing && !(await verify(el.querySelector('#lk-old').value))) return err(el, 'رمز فعلی اشتباه است');
-            if (nw.length < 4) return err(el, 'رمز باید حداقل ۴ حرف باشد');
-            if (nw !== el.querySelector('#lk-new2').value) return err(el, 'تکرار رمز یکسان نیست');
-            await setPassword(nw);
-            sessionStorage.setItem(SESSION_KEY, '1');
-            closeOverlay(); refreshBtn();
-        });
+    const logout = async () => {
+        try { if (navigator.onLine) await rpc('app_logout', { p_token: tok() }); } catch {}
+        localStorage.removeItem(SESSION_KEY);
+        location.reload();
     };
 
-    const showManage = () => {
-        const el = dialog(`
-            <h2>قفل برنامه فعال است</h2><p>اطلاعات شما فقط روی همین دستگاه ذخیره می‌شود.</p>
-            <button id="lk-now">قفل کن</button>
-            <button id="lk-change">تغییر رمز</button>
-            <button class="danger" id="lk-remove">حذف رمز</button>`);
-        el.querySelector('#lk-now').addEventListener('click', () => { sessionStorage.removeItem(SESSION_KEY); showUnlock(); });
-        el.querySelector('#lk-change').addEventListener('click', () => showSet(true));
-        el.querySelector('#lk-remove').addEventListener('click', () => {
-            const e2 = dialog(`<h2>حذف رمز</h2><p>رمز فعلی را وارد کنید</p>
-                <input type="password" id="lk-old"><div class="lock-err"></div>
-                <button class="primary" id="lk-rm">حذف رمز</button>`);
-            e2.querySelector('#lk-rm').addEventListener('click', async () => {
-                if (!(await verify(e2.querySelector('#lk-old').value))) return err(e2, 'رمز اشتباه است');
-                localStorage.removeItem(LOCK_KEY); closeOverlay(); refreshBtn();
-            });
+    const showChangePassword = () => {
+        const el = dialog(`<h2>تغییر رمز</h2>
+            <input id="cp-o" type="password" placeholder="رمز فعلی" dir="ltr">
+            <input id="cp-n" type="password" placeholder="رمز جدید (حداقل ۶ حرف)" dir="ltr">
+            <div class="lock-err"></div><button class="primary" id="cp-go">ذخیره</button>`);
+        $('#cp-go', el).addEventListener('click', async () => {
+            const b = $('#cp-go', el); busy(b, true);
+            try { await rpc('app_change_password', { p_token: tok(), p_old: $('#cp-o', el).value, p_new: $('#cp-n', el).value }); showMenu('رمز تغییر کرد ✓'); }
+            catch (e) { setErr(el, e.message); busy(b, false); }
         });
     };
 
-    const btn = document.getElementById('lock-btn');
-    const refreshBtn = () => { btn?.classList.toggle('on', !!getLock()); };
-    btn?.addEventListener('click', () => {
-        if (!hasCrypto) return alert('قفل برنامه در این مرورگر/آدرس پشتیبانی نمی‌شود (نیاز به HTTPS).');
-        getLock() ? showManage() : showSet(false);
-    });
-    refreshBtn();
+    const showUsers = async () => {
+        const el = dialog(`<h2>مدیریت کاربران</h2><div id="u-list" style="text-align:right;font-size:.9rem">در حال بارگذاری…</div>
+            <hr style="border:0;border-top:1px solid var(--border-color);margin:.8rem 0">
+            <p style="margin-bottom:.4rem"><b>ساخت کاربر جدید</b></p>
+            <input id="nu-u" placeholder="نام کاربری" dir="ltr" autocapitalize="off">
+            <input id="nu-p" type="text" placeholder="رمز (حداقل ۶ حرف)" dir="ltr">
+            <label style="display:block;font-size:.85rem;margin:.2rem 0 .4rem"><input type="checkbox" id="nu-a" style="width:auto;margin-left:.4rem">مدیر باشد</label>
+            <div class="lock-err"></div><button class="primary" id="nu-go">ساخت کاربر</button>`);
+        const load = async () => {
+            try {
+                const users = await rpc('app_list_users', { p_token: tok() });
+                $('#u-list', el).innerHTML = users.map(u => `
+                    <div style="display:flex;justify-content:space-between;align-items:center;gap:.4rem;padding:.35rem 0;border-bottom:1px solid var(--border-color)">
+                        <span>${u.username}${u.is_admin ? ' <small>(مدیر)</small>' : ''}${u.disabled ? ' <small style="color:var(--danger-color)">غیرفعال</small>' : ''}
+                        <small style="color:var(--text-muted)"> · ${u.games} بازی</small></span>
+                        <span style="display:flex;gap:.3rem">
+                            <button data-reset="${u.username}" style="width:auto;padding:.25rem .6rem;margin:0;font-size:.75rem">رمز</button>
+                            ${u.username === session.username ? '' : `<button data-dis="${u.username}" data-v="${!u.disabled}" style="width:auto;padding:.25rem .6rem;margin:0;font-size:.75rem">${u.disabled ? 'فعال' : 'غیرفعال'}</button>`}
+                        </span></div>`).join('');
+            } catch (e) { $('#u-list', el).textContent = e.message; }
+        };
+        el.addEventListener('click', async (ev) => {
+            const r = ev.target.closest('[data-reset]'), d = ev.target.closest('[data-dis]');
+            try {
+                if (r) { const np = prompt('رمز جدید برای ' + r.dataset.reset + ' (حداقل ۶ حرف):'); if (np) { await rpc('app_admin_reset_password', { p_token: tok(), p_username: r.dataset.reset, p_new: np }); alert('رمز تغییر کرد'); } }
+                if (d) { await rpc('app_set_disabled', { p_token: tok(), p_username: d.dataset.dis, p_disabled: d.dataset.v === 'true' }); load(); }
+            } catch (e) { setErr(el, e.message); }
+        });
+        $('#nu-go', el).addEventListener('click', async () => {
+            const b = $('#nu-go', el); busy(b, true); setErr(el, '');
+            try {
+                await rpc('app_create_user', { p_token: tok(), p_username: $('#nu-u', el).value, p_password: $('#nu-p', el).value, p_is_admin: $('#nu-a', el).checked });
+                $('#nu-u', el).value = ''; $('#nu-p', el).value = ''; await load();
+            } catch (e) { setErr(el, e.message); }
+            busy(b, false);
+        });
+        load();
+    };
 
-    // Lock on open, and after the app has been in the background for a while
-    const needsUnlock = () => !!getLock() && !sessionStorage.getItem(SESSION_KEY);
-    if (hasCrypto && needsUnlock()) showUnlock();
-    let hiddenAt = 0;
-    document.addEventListener('visibilitychange', () => {
-        if (document.hidden) { hiddenAt = Date.now(); return; }
-        if (hasCrypto && getLock() && hiddenAt && Date.now() - hiddenAt > AUTO_LOCK_MS) {
-            sessionStorage.removeItem(SESSION_KEY); showUnlock();
+    const STATUS_TEXT = { ok: 'همگام‌سازی شد ✓', syncing: 'در حال همگام‌سازی…', pending: 'تغییرات در انتظار ارسال', offline: 'آفلاین — پس از اتصال همگام می‌شود', error: 'خطا در همگام‌سازی', local: 'حالت محلی' };
+    const showMenu = (note) => {
+        if (!configured) {
+            return dialog(`<h2>حالت محلی</h2><p>سرور تنظیم نشده است؛ اطلاعات فقط روی همین دستگاه ذخیره می‌شود و ورود لازم نیست.</p>`);
         }
-    });
+        const el = dialog(`<h2>${session.username}${session.is_admin ? ' <small>(مدیر)</small>' : ''}</h2>
+            <p>${note || STATUS_TEXT[syncState] || ''}</p>
+            <button id="m-sync">همگام‌سازی اکنون</button>
+            <button id="m-pw">تغییر رمز</button>
+            ${session.is_admin ? '<button id="m-users">مدیریت کاربران</button>' : ''}
+            <button class="danger" id="m-out">خروج از حساب</button>`);
+        $('#m-sync', el).addEventListener('click', () => { sync.run(); close(); });
+        $('#m-pw', el).addEventListener('click', showChangePassword);
+        $('#m-users', el)?.addEventListener('click', () => navigator.onLine ? showUsers() : setErr(el, ERR.network) || alert(ERR.network));
+        $('#m-out', el).addEventListener('click', () => { if (confirm('خروج از حساب؟ بازی‌های همگام‌شده روی سرور می‌مانند.')) logout(); });
+    };
 
-    // Ask the browser not to evict our data under storage pressure
+    // ---------- sync ----------
+    let syncState = configured ? 'pending' : 'local';
+    const setState = (s) => { syncState = s; $('#user-btn')?.setAttribute('data-sync', s); };
+    const hashOf = (o) => { const s = JSON.stringify(o); let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return String(h); };
+    const sync = (() => {
+        let timer = null, running = false, again = false;
+        const key = () => 'shelem-sync:' + session.username;
+        const getH = () => (readJSON(key()) || {}).hashes || {};
+        const putH = (h) => localStorage.setItem(key(), JSON.stringify({ hashes: h }));
+        const bridge = () => window.ShelemBridge;
+
+        const run = async () => {
+            if (!configured || !session || !bridge()) return;
+            if (!navigator.onLine) return setState('offline');
+            if (running) { again = true; return; }
+            running = true; setState('syncing');
+            try {
+                const hashes = getH();
+                // 1) pull + merge
+                const rows = await rpc('app_list_games', { p_token: tok() });
+                let games = bridge().getGames().slice(), changedLocal = false;
+                for (const row of rows) {
+                    const i = games.findIndex(g => g.id === row.game_id), local = i >= 0 ? games[i] : null;
+                    const localUnchanged = local && hashes[row.game_id] === hashOf(local);
+                    if (row.deleted) {
+                        if (local && localUnchanged) { games.splice(i, 1); changedLocal = true; delete hashes[row.game_id]; }
+                        else if (!local) delete hashes[row.game_id];
+                    } else if (!local) {
+                        games.push(row.data); hashes[row.game_id] = hashOf(row.data); changedLocal = true;
+                    } else if (localUnchanged) {
+                        if (hashOf(row.data) !== hashOf(local)) { games[i] = row.data; changedLocal = true; }
+                        hashes[row.game_id] = hashOf(row.data);
+                    } else if (hashes[row.game_id] === undefined && (row.data.lastActivity || 0) > (local.lastActivity || 0)) {
+                        games[i] = row.data; hashes[row.game_id] = hashOf(row.data); changedLocal = true;
+                    } // else: local has newer unsynced edits -> keep, will push
+                }
+                if (changedLocal) bridge().setGames(games);
+                // 2) push local changes
+                games = bridge().getGames();
+                const up = games.filter(g => hashes[g.id] !== hashOf(g)).map(g => ({ game_id: g.id, data: g, updated_at: Date.now(), deleted: false }));
+                const gone = Object.keys(hashes).filter(id => !games.some(g => g.id === id)).map(id => ({ game_id: id, data: null, updated_at: Date.now(), deleted: true }));
+                if (up.length || gone.length) {
+                    await rpc('app_save_games', { p_token: tok(), p_games: [...up, ...gone] });
+                    up.forEach(u => { hashes[u.game_id] = hashOf(u.data); });
+                    gone.forEach(g => { delete hashes[g.game_id]; });
+                }
+                putH(hashes);
+                setState('ok');
+            } catch (e) {
+                if (e.code === 'unauthorized') { localStorage.removeItem(SESSION_KEY); location.reload(); return; }
+                setState(e.code === 'network' ? 'offline' : 'error'); console.warn('sync failed', e);
+            } finally { running = false; if (again) { again = false; setTimeout(run, 300); } }
+        };
+        const notify = () => { if (!configured || !session) return; setState(navigator.onLine ? 'pending' : 'offline'); clearTimeout(timer); timer = setTimeout(run, 1500); };
+        return { run, notify };
+    })();
+    window.ShelemSync = { notify: sync.notify, run: sync.run };
+
+    // ---------- start ----------
+    const userBtn = $('#user-btn');
+    userBtn?.addEventListener('click', () => showMenu());
+    if (userBtn) userBtn.setAttribute('data-sync', syncState);
+
+    if (configured) {
+        if (!session) {
+            showLogin(navigator.onLine ? '' : 'برای اولین ورود باید به اینترنت وصل باشید');
+            window.addEventListener('online', () => { if (!session && $('#lg-u')) $('.lock-box p').textContent = 'با نام کاربری و رمز خود وارد شوید'; });
+        } else {
+            window.addEventListener('DOMContentLoaded', () => setTimeout(sync.run, 300));
+            window.addEventListener('online', () => sync.run());
+            document.addEventListener('visibilitychange', () => { if (!document.hidden) sync.run(); });
+            setInterval(() => { if (!document.hidden) sync.run(); }, 90 * 1000);
+            if (navigator.onLine) rpc('app_me', { p_token: tok() }).then(me => { session.is_admin = me.is_admin; }).catch(e => { if (e.code === 'unauthorized') { localStorage.removeItem(SESSION_KEY); location.reload(); } });
+        }
+    }
     if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
 })();
 
@@ -1737,17 +1876,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     moment.locale('fa');
 
+    const STORAGE_KEY = window.SHELEM_STORAGE_KEY || 'shelem-app-state';
     const db = {
-        save: () => {
+        persist: () => {
             try {
                 const { history, modalStack, ...stateToSave } = state;
-                localStorage.setItem('shelem-app-state', JSON.stringify(stateToSave));
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
             } catch (e) {
                 console.error("Error saving to localStorage", e);
             }
         },
+        save: () => { db.persist(); window.ShelemSync && window.ShelemSync.notify(); },
         load: () => {
-            const savedState = localStorage.getItem('shelem-app-state');
+            const savedState = localStorage.getItem(STORAGE_KEY);
             if (savedState) {
                 try {
                     const parsedState = JSON.parse(savedState);
@@ -1759,6 +1900,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
+    };
+
+    // Bridge used by auth.js to merge games coming from the server
+    window.ShelemBridge = {
+        getGames: () => state.games,
+        setGames: (games) => {
+            state.games = games;
+            db.persist();
+            const cur = state.history[state.history.length - 1];
+            if (!cur || cur.page === 'home-page') renderHomePage();
+            else if (cur.page === 'game-page' && cur.context && !state.games.some(g => g.id === cur.context.gameId)) { state.history = [{ page: 'home-page', context: null }]; updateUI('home-page'); }
+        },
     };
 
     // --- THEME ---
@@ -2252,6 +2405,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const isShelem = hand.hakemScore === 165;
                 const isYasa = hakemScore < 0 && hand.hakemScore < 85 && hand.commitment < 165;
 
+                const lockNote = hand.lockedZero ? `<div class="lock-note">🔒 امتیاز حریف (${toPersianDigits(hand.nonHakemScore)}) حساب نشد: حریف بالای ${toPersianDigits(lockThreshold(game))} بود و حاکم موفق شد.</div>` : '';
                 if (isShelem) {
                     specialEventText = ' (شلم)';
                     cardStatusClass += ' shelem';
@@ -2292,6 +2446,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             </div>
                             ${index === game.hands.length - 1 ? `<button class="btn edit-btn" data-hand-index="${index}">ویرایش</button>` : ''}
                         </div>
+                        ${lockNote}
                         ${badgeChangesHTML}
                     </div>
                 `;
@@ -2941,6 +3096,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
             <p class="modal-sub">حاکم: <strong>${game.players[hand.hakem]}</strong> · تعهد: <strong>${commitLabel}</strong></p>
             ${hand.commitment <= 165 ? `<p class="fail-threshold">اگر حریف ${toPersianDigits(failAt)} یا بیشتر بگیرد، حاکم منفی می‌خورد</p>` : ''}
+            ${isLocked(game, nonHakemTeam) ? `<p class="fail-threshold" style="color:var(--primary-color)">🔒 تیم حریف بالای ${toPersianDigits(lockThreshold(game))} است؛ امتیازش فقط وقتی حساب می‌شود که حاکم منفی بخورد.</p>` : ''}
             <p class="modal-sub">حکم (اختیاری)</p>
             <div class="suit-chips">${suitChips}</div>
             <p class="modal-sub" style="margin-bottom:.5rem">تیم ${nonHakemPlayers.join(' و ')} چند امتیاز گرفتند؟</p>
@@ -2996,8 +3152,9 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.button-grid .grid-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const score = parseInt(e.currentTarget.dataset.score);
-                    const scores = calculateHandScores(hand.commitment, score);
                     const hakemTeam = getTeam(game, hand.hakem);
+                    const scores = calculateHandScores(hand.commitment, score, isLocked(game, getOppositeTeam(game, hand.hakem), handIndex));
+                    game.hands[handIndex].lockedZero = scores.lockedZero;
                     
                     game.hands[handIndex].scores = {
                         team1: hakemTeam === 'team1' ? scores.hakem : scores.nonHakem,
@@ -3028,30 +3185,38 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     
     // --- GAME LOGIC ---
-    const calculateHandScores = (commitment, nonHakemScore) => {
+    // Team total above this (scaled from 1000 for the 1165 target) is "locked":
+    // as the non-hakem team it can only gain points if the opponent hakem fails (manfi).
+    const lockThreshold = (game) => Math.floor((1000 * game.targetScore / 1165) / 5) * 5;
+    const teamTotalBefore = (game, team, upTo) => game.hands.slice(0, upTo).reduce((acc, h) => acc + h.scores[team], 0);
+    const isLocked = (game, team, upTo = game.hands.length) => teamTotalBefore(game, team, upTo) > lockThreshold(game);
+
+    const calculateHandScores = (commitment, nonHakemScore, nonHakemLocked = false) => {
         const hakemScore = 165 - nonHakemScore;
         let finalHakemScore = 0;
         let finalNonHakemScore = nonHakemScore;
+        let lockedZero = false;
 
         if (commitment === 330 && hakemScore === 165) { // Shelem
             finalHakemScore = 330;
             finalNonHakemScore = 0;
         } else if (commitment === 660 && hakemScore === 165) { // SarShelem
-             finalHakemScore = 660;
-             finalNonHakemScore = 0;
+            finalHakemScore = 660;
+            finalNonHakemScore = 0;
         } else if (hakemScore === 165) { // Unannounced Shelem
             finalHakemScore = commitment * 2;
             finalNonHakemScore = 0;
         } else if (hakemScore >= commitment) { // Successful bid
             finalHakemScore = hakemScore;
-        } else { // Failed bid
+            if (nonHakemLocked && nonHakemScore > 0) { finalNonHakemScore = 0; lockedZero = true; }
+        } else { // Failed bid (manfi)
             if (hakemScore < 85 && commitment < 165) { // Yasa
                 finalHakemScore = -2 * commitment;
             } else {
                 finalHakemScore = -commitment;
             }
         }
-        return { hakem: finalHakemScore, nonHakem: finalNonHakemScore };
+        return { hakem: finalHakemScore, nonHakem: finalNonHakemScore, lockedZero };
     };
 
     const calculateAndRecordScores = (gameId, nonHakemScore) => {
@@ -3060,10 +3225,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const hakemTeam = getTeam(game, currentHand.hakem);
         const nonHakemTeam = getOppositeTeam(game, currentHand.hakem);
 
-        const scores = calculateHandScores(currentHand.commitment, nonHakemScore);
+        const scores = calculateHandScores(currentHand.commitment, nonHakemScore, isLocked(game, nonHakemTeam));
 
         const handResult = {
             ...currentHand,
+            lockedZero: scores.lockedZero,
             hakemScore: 165 - nonHakemScore,
             nonHakemScore: nonHakemScore,
             scores: { team1: 0, team2: 0 }

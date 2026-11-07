@@ -7,3 +7,4 @@ main.py
 ثبت امتیازات شلم.html
 ثبت امتیازات شلم_files/
 dist/
+supabase/*.local.sql
