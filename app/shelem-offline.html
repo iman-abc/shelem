@@ -1098,7 +1098,9 @@ main, main.header-scrolled { padding-top: calc(var(--header-height) + 1rem) !imp
 .chart-wrapper { padding: .75rem !important; height: 260px !important; position: relative; }
 .chart-wrapper.full-width-chart { height: 300px !important; }
 .chart-wrapper.tall { height: 340px !important; }
-.chart-wrapper canvas { max-width: 100%; }
+/* flex wrapper: Safari/WebKit reports a block canvas' leftover space as a margin, which made Chart.js stick at 300px */
+.chart-wrapper { display: flex !important; }
+.chart-wrapper canvas { margin: 0 !important; min-width: 0; }
 @media (max-width: 480px) {
     .chart-wrapper { height: 230px !important; padding: .5rem !important; }
     .chart-wrapper.full-width-chart { height: 260px !important; }
@@ -1184,6 +1186,9 @@ html, body, button, input, textarea, select, .lock-box, .modal-content { font-fa
 .lock-box button.ghost { background: transparent; border-style: dashed; color: var(--text-muted); }
 .offline-dl:has(#install-btn) { margin: -3.5rem 0 .75rem; }
 .offline-dl:not(:has(#install-btn)) { margin: 0 0 5rem; }
+
+.chart-wrapper[hidden] { display: none !important; }
+#history-btn { background: var(--surface) !important; color: var(--text-color) !important; border: 1px solid var(--border-color) !important; box-shadow: none !important; }
 
 </style>
     <style>
@@ -2043,7 +2048,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const toPersianDigits = (str) => {
         if (str === null || str === undefined) return '';
         const persian = { '0': '۰', '1': '۱', '2': '۲', '3': '۳', '4': '۴', '5': '۵', '6': '۶', '7': '۷', '8': '۸', '9': '۹' };
-        return String(str).replace(/[0-9]/g, (w) => persian[w]);
+        return String(str).replace(/[0-9]/g, (w) => persian[w]).replace(/-([۰-۹][۰-۹.٫]*)/g, '\u202A-$1\u202C');
     };
     const generateUUID = () => crypto.randomUUID();
 
@@ -2657,7 +2662,7 @@ document.addEventListener('DOMContentLoaded', () => {
             any = true;
             hand.scores[getTeam(game, hand.hakem)] >= 0 ? st[hand.suit].s++ : st[hand.suit].f++;
         });
-        if (!any) { if (wrapper) wrapper.style.display = 'none'; return; }
+        if (!any) { if (wrapper) wrapper.hidden = true; return; }
         createStackedBarChart('agg-suit-chart', 'حکم‌ها', order.map(getSuitSymbol), order.map(x => st[x].s), order.map(x => st[x].f));
     };
 
@@ -2844,7 +2849,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         document.querySelectorAll('.individual-stats-grid .chart-wrapper canvas').forEach(cv => {
-            if (!chartInstances[cv.id]) cv.closest('.chart-wrapper').style.display = 'none';
+            if (!chartInstances[cv.id]) cv.closest('.chart-wrapper').hidden = true;
         });
     };
 
@@ -3355,25 +3360,27 @@ document.addEventListener('DOMContentLoaded', () => {
         game.currentHand = null;
         game.lastActivity = Date.now();
         
+        let winnerShown = false;
         const fin = checkFinished(game);
         if (fin.finished) {
             game.isFinished = true;
             game.finishReason = fin.reason;
             if (fin.winner) {
                 const winnerPlayers = getTeamPlayers(game, fin.winner).map(p => game.players[p]);
-                showWinnerModal(winnerPlayers, fin.reason);
+                winnerShown = true;
+                showWinnerModal(winnerPlayers, fin.reason, () => { if (changes.length > 0) showBadgeChangesModal(changes); });
             }
         }
 
         db.save();
         renderGamePage(gameId);
         
-        if (changes.length > 0) {
+        if (changes.length > 0 && !winnerShown) {
             showBadgeChangesModal(changes);
         }
     };
     
-    const showWinnerModal = (winnerPlayers, reason) => {
+    const showWinnerModal = (winnerPlayers, reason, onDone) => {
         const html = `
             <div class="modal-header">
                 <h2>پایان بازی!</h2>
@@ -3387,7 +3394,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `;
         openModal(html, () => {
-            document.getElementById('close-winner-modal').addEventListener('click', closeModal);
+            document.getElementById('close-winner-modal').addEventListener('click', () => { closeModal(); if (onDone) onDone(); });
         });
     };
 

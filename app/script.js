@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const toPersianDigits = (str) => {
         if (str === null || str === undefined) return '';
         const persian = { '0': '۰', '1': '۱', '2': '۲', '3': '۳', '4': '۴', '5': '۵', '6': '۶', '7': '۷', '8': '۸', '9': '۹' };
-        return String(str).replace(/[0-9]/g, (w) => persian[w]);
+        return String(str).replace(/[0-9]/g, (w) => persian[w]).replace(/-([۰-۹][۰-۹.٫]*)/g, '\u202A-$1\u202C');
     };
     const generateUUID = () => crypto.randomUUID();
 
@@ -735,7 +735,7 @@ document.addEventListener('DOMContentLoaded', () => {
             any = true;
             hand.scores[getTeam(game, hand.hakem)] >= 0 ? st[hand.suit].s++ : st[hand.suit].f++;
         });
-        if (!any) { if (wrapper) wrapper.style.display = 'none'; return; }
+        if (!any) { if (wrapper) wrapper.hidden = true; return; }
         createStackedBarChart('agg-suit-chart', 'حکم‌ها', order.map(getSuitSymbol), order.map(x => st[x].s), order.map(x => st[x].f));
     };
 
@@ -922,7 +922,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         document.querySelectorAll('.individual-stats-grid .chart-wrapper canvas').forEach(cv => {
-            if (!chartInstances[cv.id]) cv.closest('.chart-wrapper').style.display = 'none';
+            if (!chartInstances[cv.id]) cv.closest('.chart-wrapper').hidden = true;
         });
     };
 
@@ -1433,25 +1433,27 @@ document.addEventListener('DOMContentLoaded', () => {
         game.currentHand = null;
         game.lastActivity = Date.now();
         
+        let winnerShown = false;
         const fin = checkFinished(game);
         if (fin.finished) {
             game.isFinished = true;
             game.finishReason = fin.reason;
             if (fin.winner) {
                 const winnerPlayers = getTeamPlayers(game, fin.winner).map(p => game.players[p]);
-                showWinnerModal(winnerPlayers, fin.reason);
+                winnerShown = true;
+                showWinnerModal(winnerPlayers, fin.reason, () => { if (changes.length > 0) showBadgeChangesModal(changes); });
             }
         }
 
         db.save();
         renderGamePage(gameId);
         
-        if (changes.length > 0) {
+        if (changes.length > 0 && !winnerShown) {
             showBadgeChangesModal(changes);
         }
     };
     
-    const showWinnerModal = (winnerPlayers, reason) => {
+    const showWinnerModal = (winnerPlayers, reason, onDone) => {
         const html = `
             <div class="modal-header">
                 <h2>پایان بازی!</h2>
@@ -1465,7 +1467,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `;
         openModal(html, () => {
-            document.getElementById('close-winner-modal').addEventListener('click', closeModal);
+            document.getElementById('close-winner-modal').addEventListener('click', () => { closeModal(); if (onDone) onDone(); });
         });
     };
 
