@@ -124,6 +124,39 @@ document.addEventListener('DOMContentLoaded', () => {
         const persian = { '0': '۰', '1': '۱', '2': '۲', '3': '۳', '4': '۴', '5': '۵', '6': '۶', '7': '۷', '8': '۸', '9': '۹' };
         return String(str).replace(/[0-9]/g, (w) => persian[w]).replace(/-([۰-۹][۰-۹.٫]*)/g, '\u202A-$1\u202C');
     };
+    // Best-effort Latin -> Persian transliteration for player names (display only).
+    // Names with no Latin letters are returned unchanged.
+    const toPersianName = (name) => {
+        if (!name || !/[A-Za-z]/.test(name)) return name;
+        const digraphs = { kh: 'خ', sh: 'ش', ch: 'چ', gh: 'ق', zh: 'ژ', th: 'ت', ph: 'ف', ee: 'ی', oo: 'و', aa: 'ا', ou: 'و', ei: 'ی', ai: 'ای' };
+        const single = { a: 'ا', b: 'ب', c: 'ک', d: 'د', e: 'ه', f: 'ف', g: 'گ', h: 'ه', i: 'ی', j: 'ج', k: 'ک', l: 'ل', m: 'م', n: 'ن', o: 'و', p: 'پ', q: 'ق', r: 'ر', s: 'س', t: 'ت', u: 'و', v: 'و', w: 'و', x: 'کس', y: 'ی', z: 'ز' };
+        const vowels = 'aeiouy';
+        return name.split(/(\s+)/).map(word => {
+            const lower = word.toLowerCase();
+            if (!/[a-z]/.test(lower)) return word;
+            let out = '';
+            for (let i = 0; i < lower.length;) {
+                const two = lower.substr(i, 2);
+                const ch = lower[i];
+                if (digraphs[two]) { out += digraphs[two]; i += 2; continue; }
+                if (single[ch]) {
+                    // Vowels in the middle of a word are usually short (not written): skip a/e/o/u there,
+                    // keep them at the start (as ا) and at the end (a -> ا, e -> ه, o/u -> و, i/y -> ی).
+                    const isVowel = vowels.includes(ch);
+                    const atStart = i === 0, atEnd = i === lower.length - 1;
+                    if (isVowel && !atStart && !atEnd && 'aeo'.includes(ch)) { i++; continue; }
+                    if (ch === 'e' && atEnd) { out += 'ه'; i++; continue; }
+                    if (atStart && 'eou'.includes(ch)) { out += 'ا'; i++; continue; }
+                    if (i > 0 && lower[i - 1] === ch && !isVowel) { i++; continue; } // collapse doubled consonants
+                    out += single[ch];
+                } else if (/[0-9]/.test(ch)) {
+                    out += toPersianDigits(ch);
+                }
+                i++;
+            }
+            return out;
+        }).join('');
+    };
     const generateUUID = () => crypto.randomUUID();
 
     // --- NAVIGATION & HISTORY MANAGEMENT ---
@@ -1764,9 +1797,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const badgeChip = `<span class="badge-chip" data-badge-id="${badgeId}">${badgeData[badgeId].name}</span>`;
             
             const getName = (item) => {
-                if (item.type === 'player') return game.players[item.key];
+                if (item.type === 'player') return toPersianName(game.players[item.key]);
                 if (item.type === 'team') {
-                    const players = getTeamPlayers(game, item.key).map(p => game.players[p]);
+                    const players = getTeamPlayers(game, item.key).map(p => toPersianName(game.players[p]));
                     return `تیم ${players.join(' و ')}`;
                 }
             };
