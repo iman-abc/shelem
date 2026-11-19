@@ -938,16 +938,19 @@ input[type=number] {
 .badge-chip.badge-hakem { background-color: #6f42c1; }
 .badge-chip.badge-dealer { background-color: #fd7e14; }
 
-#badge-changes-modal ul {
+#badge-changes-modal ul,
+.badge-changes-list {
     list-style-type: none;
     padding: 0;
 }
 
-#badge-changes-modal li {
+#badge-changes-modal li,
+.badge-changes-list li {
     padding: 0.5rem;
     border-bottom: 1px solid var(--border-color);
 }
-#badge-changes-modal li:last-child {
+#badge-changes-modal li:last-child,
+.badge-changes-list li:last-child {
     border-bottom: none;
 }
 

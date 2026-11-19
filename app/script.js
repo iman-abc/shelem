@@ -109,10 +109,17 @@ document.addEventListener('DOMContentLoaded', () => {
         nim_soltan_diamonds: { name: 'نیم‌سلطان ♦', description: 'به همراه دیگران، بیشترین تعداد حکم خشت را (حداقل ۳ بار) داشته است.', type: 'hakem' },
         super_hakem: { name: 'سوپر حاکم', description: 'کسی که حداقل سه بار حاکم بوده و در مجموع دفعاتی که حاکم شده بیشترین امتیاز را گرفته است.', type: 'hakem' },
         super_manfi_khor: { name: 'سوپر منفی‌خور', description: 'کسی که حداقل سه بار حاکم بوده و در مجموع کمترین امتیاز (منفی) را کسب کرده است.', type: 'hakem' },
+        bi_bakht: { name: 'بی‌باخت', description: 'حاکمی که حداقل ۳ بار حاکم شده و تا الان حتی یک بار هم منفی نخورده است.', type: 'hakem' },
+        ghomar_baz: { name: 'قمارباز', description: 'حاکمی که حداقل ۲ بار تعهد ۱۴۵ یا بیشتر گرفته است (چه ببرد چه ببازد).', type: 'hakem' },
+        mohtat: { name: 'محتاط', description: 'حاکمی که حداقل ۴ بار حاکم شده، میانگین تعهدش ۱۲۵ یا کمتر است و هیچ‌وقت منفی نخورده.', type: 'hakem' },
+        daghigh_zan: { name: 'دقیق‌زن', description: 'حاکمی که حداقل یک بار دقیقاً به اندازه‌ی تعهدش امتیاز گرفته (بدون حتی یک امتیاز اضافه).', type: 'hakem' },
+        seh_taei: { name: 'سه‌تایی پشت‌سرهم', description: 'حاکمی که ۳ بار پشت‌سرهم (در دست‌هایی که خودش حاکم بوده) برده است.', type: 'hakem' },
         // Dealer Badges
         dast_tala: { name: 'دست طلا', description: 'تنها کسی که حداقل سه بار دست داده و در مجموع تفاضل امتیاز تیمش از حریف مثبت و بیشترین بوده است.', type: 'dealer' },
         dast_siah: { name: 'دست‌سیاه', description: 'تنها کسی که حداقل سه بار دست داده و در مجموع تفاضل امتیاز تیمش از حریف منفی و کمترین بوده است.', type: 'dealer' },
+        kabous_dealer: { name: 'کابوس دیلر', description: 'دیلری که حداقل ۳ بار دست داده و تیمش در تمام آن دست‌ها باخته است.', type: 'dealer' },
         // Team Badges
+        shekarchi_hakem: { name: 'شکارچی حاکم', description: 'تیمی که بیشتر از همه (و حداقل ۳ بار) تعهد حاکم حریف را شکسته است.', type: 'team' },
         be_khodet_bia: { name: 'به خودت بیا!', description: 'تیمی که امتیازش از تیم حریف کمتر است و اختلاف امتیازها بیشتر از ۳۵ درصد هدف بازی است.', type: 'team' },
         shoma_mitoonid: { name: 'شما می‌تونید!', description: 'تیمی که قبلا نشان «به خودت بیا» داشته، اما حالا فاصله‌اش با حریف کم شده.', type: 'team' },
         bazgasht_ghahremanane: { name: 'بازگشت قهرمانانه', description: 'تیمی که قبلا عقب بوده اما الان از حریف جلو افتاده است.', type: 'team', permanent: true },
@@ -1477,6 +1484,7 @@ document.addEventListener('DOMContentLoaded', () => {
         handResult.scores[hakemTeam] = scores.hakem;
         handResult.scores[nonHakemTeam] = scores.nonHakem;
         
+        ensureBadgesCurrent(game); // covers games pulled from the cloud that missed the startup refresh
         const { newBadges, changes } = calculateAllBadges(game, game.hands.length, handResult);
         game.badges = newBadges;
         handResult.badgeChanges = changes;
@@ -1548,13 +1556,27 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     
     // --- BADGE LOGIC ---
+    // Rebuild badges for a game saved before the current badge set (silently, no popup). Returns true if it ran.
+    const ensureBadgesCurrent = (g) => {
+        if (!g || g.badgesV === 3) return false;
+        try {
+            let badges = { teams: { team1: [], team2: [] }, hakems: { p1: [], p2: [], p3: [], p4: [] }, dealers: { p1: [], p2: [], p3: [], p4: [] } };
+            for (let k = 1; k <= (g.hands || []).length; k++) {
+                badges = calculateAllBadges({ ...g, hands: g.hands.slice(0, k), badges }, k - 1).newBadges;
+            }
+            if ((g.hands || []).length) g.badges = badges;
+            g.badgesV = 3;
+            return true;
+        } catch (e) { console.error('Badge refresh failed', e); return false; }
+    };
+
     const showBadgeChangesModal = (changes) => {
         const html = `
             <div id="badge-changes-modal" class="modal-header">
                 <h2>تغییرات نشان‌ها</h2>
                 <button class="modal-close-btn">&times;</button>
             </div>
-            <ul>
+            <ul class="badge-changes-list">
                 ${changes.map(change => `<li>${change}</li>`).join('')}
             </ul>
         `;
@@ -1653,6 +1675,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 updatePlayerBadges(newBadges.hakems, pKey, 'pik_chi', stats.suitCounts.spades / stats.hakemHands.length >= 0.5);
                 updatePlayerBadges(newBadges.hakems, pKey, 'khesht_chi', stats.suitCounts.diamonds / stats.hakemHands.length >= 0.5);
             }
+            updatePlayerBadges(newBadges.hakems, pKey, 'daghigh_zan', stats.hakemHands.some(h => h.commitment <= 165 && h.hakemScore === h.commitment));
+            let streak = 0, bestStreak = 0;
+            stats.hakemHands.forEach(h => {
+                if (h.scores[getTeam(game, pKey)] >= 0) { streak++; bestStreak = Math.max(bestStreak, streak); } else { streak = 0; }
+            });
+            updatePlayerBadges(newBadges.hakems, pKey, 'seh_taei', bestStreak >= 3);
+            updatePlayerBadges(newBadges.hakems, pKey, 'bi_bakht', stats.hakemHands.length >= 3 && stats.failedHands.length === 0);
+            updatePlayerBadges(newBadges.hakems, pKey, 'ghomar_baz', stats.commitments.filter(c => c >= 145).length >= 2);
+            updatePlayerBadges(newBadges.hakems, pKey, 'mohtat', stats.hakemHands.length >= 4 && stats.failedHands.length === 0 &&
+                (stats.commitments.reduce((a, b) => a + b, 0) / stats.commitments.length) <= 125);
              if (stats.hakemHands.length >= 2) {
                 updatePlayerBadges(newBadges.hakems, pKey, 'doshman_shad_kon', stats.totalHakemScore < stats.totalOpponentScoreWhenHakem);
             }
@@ -1723,7 +1755,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
         // --- 2. DEALER BADGES ---
         const dealerStats = {};
-        Object.keys(game.players).forEach(pKey => { dealerStats[pKey] = { scoreDiff: 0, dealCount: 0 }; });
+        Object.keys(game.players).forEach(pKey => { dealerStats[pKey] = { scoreDiff: 0, dealCount: 0, lostCount: 0 }; });
         const dealerOrder = [game.firstDealer, getNextPlayer(game.firstDealer), getNextPlayer(getNextPlayer(game.firstDealer)), getNextPlayer(getNextPlayer(getNextPlayer(game.firstDealer)))];
     
         allHands.forEach((hand, index) => {
@@ -1732,6 +1764,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const opponentTeam = getOppositeTeam(game, dealerKey);
             dealerStats[dealerKey].scoreDiff += (hand.scores[dealerTeam] - hand.scores[opponentTeam]);
             dealerStats[dealerKey].dealCount++;
+            if (hand.scores[dealerTeam] < hand.scores[opponentTeam]) dealerStats[dealerKey].lostCount++;
         });
     
         Object.keys(newBadges.dealers).forEach(pKey => { newBadges.dealers[pKey] = []; });
@@ -1740,6 +1773,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dastTala.winners.length === 1) {
             updatePlayerBadges(newBadges.dealers, dastTala.winners[0], 'dast_tala', true);
         }
+
+        Object.keys(dealerStats).forEach(pKey => {
+            const ds = dealerStats[pKey];
+            updatePlayerBadges(newBadges.dealers, pKey, 'kabous_dealer', ds.dealCount >= 3 && ds.lostCount === ds.dealCount);
+        });
 
         const dastSiah = findWinners(dealerStats, s => s.dealCount >= 3 && s.scoreDiff < 0 ? s.scoreDiff : null, (a,b) => a < b);
         if (dastSiah.winners.length === 1) {
@@ -1761,6 +1799,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const diff = Math.abs(team1Score - team2Score);
         const threshold = 0.35 * game.targetScore;
     
+        const brokenHakem = { team1: 0, team2: 0 };
+        allHands.forEach(h => {
+            const hakemTeam = getTeam(game, h.hakem);
+            if (h.scores[hakemTeam] < 0) brokenHakem[getOppositeTeam(game, h.hakem)]++;
+        });
+        if (brokenHakem.team1 >= 3 && brokenHakem.team1 > brokenHakem.team2) updatePlayerBadges(newBadges.teams, 'team1', 'shekarchi_hakem', true);
+        if (brokenHakem.team2 >= 3 && brokenHakem.team2 > brokenHakem.team1) updatePlayerBadges(newBadges.teams, 'team2', 'shekarchi_hakem', true);
+
         if (team1Score < team2Score && diff > threshold) {
             updatePlayerBadges(newBadges.teams, 'team1', 'be_khodet_bia', true);
         } else if (team1Score < team2Score && wasBehindT1) {
@@ -2016,6 +2062,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- INITIALIZATION ---
     const init = () => {
         db.load();
+        // One-time silent badge refresh so newly added badges don't flood the popup on the next hand
+        let badgesMigrated = false;
+        state.games.forEach(g => { if (ensureBadgesCurrent(g)) badgesMigrated = true; });
+        if (badgesMigrated) db.persist();
         if (reopenStaleFinished(state.games)) db.save();
         renderRulesBadges();
         state.history = [{ page: 'home-page', context: null }];
