@@ -118,6 +118,11 @@ document.addEventListener('DOMContentLoaded', () => {
         dast_tala: { name: 'دست طلا', description: 'تنها کسی که حداقل سه بار دست داده و در مجموع تفاضل امتیاز تیمش از حریف مثبت و بیشترین بوده است.', type: 'dealer' },
         dast_siah: { name: 'دست‌سیاه', description: 'تنها کسی که حداقل سه بار دست داده و در مجموع تفاضل امتیاز تیمش از حریف منفی و کمترین بوده است.', type: 'dealer' },
         kabous_dealer: { name: 'کابوس پاسور', description: 'پاسوری که حداقل ۳ بار دست داده و تیمش در تمام آن دست‌ها باخته است.', type: 'dealer' },
+        // End-of-game awards (calculated when a game finishes; shown in the game analysis, not stored)
+        mvp_bazi: { name: 'ستاره بازی', description: 'جایزه پایان بازی: بهترین حاکمِ تیم برنده (بیشترین مجموع امتیاز حکومت، با حداقل ۲ بار حاکم شدن).', type: 'award' },
+        comeback_award: { name: 'قهرمان بازگشت', description: 'جایزه پایان بازی: تیم برنده‌ای که با جبران عقب‌ماندگی حداقل ۱۵ درصد هدف بازی، پیروز شد.', type: 'award' },
+        shelem_star: { name: 'ستاره شلم', description: 'جایزه پایان بازی: بازیکنی که در این بازی بیشترین شلم را زده (حداقل یک شلم و منحصر به فرد).', type: 'award' },
+        khosh_ghadam: { name: 'پاسور خوش‌قدم', description: 'جایزه پایان بازی: پاسوری که تیمش در دست‌های او بیشترین اختلاف امتیاز مثبت را داشته (حداقل ۲ بار پاسور).', type: 'award' },
         // Team Badges
         shekarchi_hakem: { name: 'شکارچی حاکم', description: 'تیمی که بیشتر از همه (و حداقل ۳ بار) تعهد حاکم حریف را شکسته است.', type: 'team' },
         be_khodet_bia: { name: 'به خودت بیا!', description: 'تیمی که امتیازش از تیم حریف کمتر است و اختلاف امتیازها بیشتر از ۳۵ درصد هدف بازی است.', type: 'team' },
@@ -329,14 +334,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="team-score-card">
                             <div class="team-info">
                                 <span class="team-names">${teamLabel(game, 'team1')}</span>
-                                <span class="team-score score-value ${team1Score < 0 ? 'negative' : ''}">${toPersianDigits(team1Score)}</span>
+                                <span class="team-score score-value ${team1Score < 0 ? 'negative' : team1Score === 0 ? 'zero' : ''}">${team1Score === 0 ? 'صفر' : toPersianDigits(team1Score)}</span>
                             </div>
                             <div class="score-progress"><div class="progress-bar" style="width: ${progress1}%;"></div></div>
                         </div>
                         <div class="team-score-card">
                             <div class="team-info">
                                 <span class="team-names">${teamLabel(game, 'team2')}</span>
-                                <span class="team-score score-value ${team2Score < 0 ? 'negative' : ''}">${toPersianDigits(team2Score)}</span>
+                                <span class="team-score score-value ${team2Score < 0 ? 'negative' : team2Score === 0 ? 'zero' : ''}">${team2Score === 0 ? 'صفر' : toPersianDigits(team2Score)}</span>
                             </div>
                              <div class="score-progress"><div class="progress-bar" style="width: ${progress2}%;"></div></div>
                         </div>
@@ -414,6 +419,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         ${game.finishReason === 'gap' ? '<br><small>(اختلاف امتیاز به سقف بازی رسید)</small>' : ''}
                     </p>
                 </div>
+                ${renderGameAnalysis(game)}
             `;
         } else if (currentHand) {
             const nonHakemTeamPlayers = getTeamPlayers(game, getOppositeTeam(game, currentHand.hakem)).map(p => toPersianName(game.players[p]));
@@ -500,7 +506,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <span class="team-names">${teamLabel(game, 'team1')}</span><button class="edit-team-btn" data-edit-teams="1" title="ویرایش نام تیم">✎</button>
                             <div class="badges-container">${renderBadges(team1Badges, 'team')}</div>
                         </div>
-                        <span class="team-score score-value ${team1Score < 0 ? 'negative' : ''}">${toPersianDigits(team1Score)}</span>
+                        <span class="team-score score-value ${team1Score < 0 ? 'negative' : team1Score === 0 ? 'zero' : ''}">${team1Score === 0 ? 'صفر' : toPersianDigits(team1Score)}</span>
                     </div>
                     <div class="points-to-target">${remaining1 > 0 ? `${toPersianDigits(remaining1)} امتیاز تا هدف` : 'به امتیاز هدف رسیده'}</div>
                     <div class="score-progress"><div class="progress-bar" style="width: ${Math.max(0, (team1Score / game.targetScore) * 100)}%;"></div></div>
@@ -511,7 +517,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <span class="team-names">${teamLabel(game, 'team2')}</span><button class="edit-team-btn" data-edit-teams="1" title="ویرایش نام تیم">✎</button>
                             <div class="badges-container">${renderBadges(team2Badges, 'team')}</div>
                         </div>
-                        <span class="team-score score-value ${team2Score < 0 ? 'negative' : ''}">${toPersianDigits(team2Score)}</span>
+                        <span class="team-score score-value ${team2Score < 0 ? 'negative' : team2Score === 0 ? 'zero' : ''}">${team2Score === 0 ? 'صفر' : toPersianDigits(team2Score)}</span>
                     </div>
                     <div class="points-to-target">${remaining2 > 0 ? `${toPersianDigits(remaining2)} امتیاز تا هدف` : 'به امتیاز هدف رسیده'}</div>
                     <div class="score-progress"><div class="progress-bar" style="width: ${Math.max(0, (team2Score / game.targetScore) * 100)}%;"></div></div>
@@ -621,19 +627,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 let badgeChangesHTML = '';
                 if (hand.badgeChanges && hand.badgeChanges.length > 0) {
                     badgeChangesHTML = `
-                        <div class="badge-changes-history">
-                            <strong>تغییرات نشان‌ها:</strong>
+                        <details class="badge-changes-history">
+                            <summary>تغییرات نشان‌ها (${toPersianDigits(hand.badgeChanges.length)})</summary>
                             <ul>
                                 ${hand.badgeChanges.map(change => `<li>${change}</li>`).join('')}
                             </ul>
-                        </div>
+                        </details>
                     `;
                 }
 
                 content += `
                     <div class="hand-card ${cardStatusClass}">
                         <div class="hand-card-header">
-                            دست ${toPersianDigits(index + 1)} <span>(پاسور: ${dealer})</span>
+                            <div>دست ${toPersianDigits(index + 1)} <span>(پاسور: ${dealer})</span></div>
+                            <button class="delete-hand-btn" data-hand-index="${index}" title="حذف دست" aria-label="حذف دست">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>
+                            </button>
                         </div>
                         <div class="hand-card-body">
                             <span><strong>حاکم:</strong> ${toPersianName(game.players[hand.hakem])}</span>
@@ -648,7 +657,6 @@ document.addEventListener('DOMContentLoaded', () => {
                                 امتیاز حریف: <span class="score-value">${toPersianDigits(opponentScore)}</span>
                             </div>
                             ${index === game.hands.length - 1 ? `<button class="btn edit-btn" data-hand-index="${index}">ویرایش</button>` : ''}
-                            <button class="btn btn-danger delete-hand-btn" data-hand-index="${index}">حذف</button>
                         </div>
                         ${lockNote}
                         ${badgeChangesHTML}
@@ -717,6 +725,14 @@ document.addEventListener('DOMContentLoaded', () => {
         createAggregateSuitChart(playerStats, game);
         createAggregateSuccessChart(playerStats, game);
         createAggregatePointsChart(playerStats, game);
+        // hide wrappers whose chart has no data; if an odd number of half-width charts remain, let the last one span the row
+        const grid = document.querySelector('.stats-grid');
+        if (grid) {
+            const ws = [...grid.querySelectorAll('.chart-wrapper')];
+            ws.forEach(w => { const cv = w.querySelector('canvas'); w.hidden = !(cv && chartInstances[cv.id]); w.classList.remove('span-all'); });
+            const half = ws.filter(w => !w.hidden && !w.classList.contains('full-width-chart'));
+            if (half.length % 2 === 1) half[half.length - 1].classList.add('span-all');
+        }
     };
 
     const teamNames = (game) => [teamLabel(game, 'team1'), teamLabel(game, 'team2')];
@@ -727,15 +743,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const labels = ['۰'], d1 = [0], d2 = [0];
         let t1 = 0, t2 = 0;
         game.hands.forEach((h, i) => { labels.push(faNum(i + 1)); t1 += h.scores.team1; t2 += h.scores.team2; d1.push(t1); d2.push(t2); });
-        const maxVal = Math.max(game.targetScore, t1, t2);
-        const opts = baseOptions(c, { title: 'روند امتیازات' });
-        opts.scales.y.suggestedMax = maxVal * 1.05;
+        const lead = Math.max(t1, t2);
+        const showTarget = lead >= game.targetScore * 0.5; // early in the game, scale to the data so the lines are readable
+        const opts = baseOptions(c, { title: showTarget ? 'روند امتیازات' : `روند امتیازات (هدف ${faNum(game.targetScore)})` });
+        opts.scales.y.suggestedMax = (showTarget ? Math.max(game.targetScore, lead) : Math.max(lead, 100)) * 1.1;
         opts.scales.x.title = { display: true, text: 'شمارهٔ دست', color: c.muted, font: { size: 11 } };
         opts.plugins.annotation = { annotations: {
             zero: { type: 'line', yMin: 0, yMax: 0, borderColor: c.muted, borderWidth: 1 },
             target: { type: 'line', yMin: game.targetScore, yMax: game.targetScore, borderColor: c.bad, borderWidth: 1.5, borderDash: [6, 6],
                 label: { display: true, content: `هدف ${faNum(game.targetScore)}`, position: 'start', backgroundColor: 'transparent', color: c.bad, font: { size: 11 }, yAdjust: -10 } },
         } };
+        if (!showTarget) delete opts.plugins.annotation.annotations.target;
         const ds = (label, data, color) => ({ label, data, borderColor: color, backgroundColor: color, borderWidth: 2.5, pointRadius: game.hands.length > 20 ? 0 : 3, pointHoverRadius: 5, tension: 0.25, fill: false });
         mkChart('score-chart', { type: 'line', data: { labels, datasets: [ds(n1, d1, c.t1), ds(n2, d2, c.t2)] }, options: opts });
     };
@@ -863,6 +881,138 @@ document.addEventListener('DOMContentLoaded', () => {
         return playerStats;
     };
 
+    // averages are shown rounded to the nearest multiple of 5 (ends in 0 or 5)
+    const round5 = (v) => Math.round(v / 5) * 5;
+    // --- END-OF-GAME ANALYSIS (computed from the hands every time; nothing is stored) ---
+    const computeGameAnalysis = (game) => {
+        const hands = game.hands || [];
+        if (!hands.length) return null;
+        const teams = ['team1', 'team2'];
+        const other = (t) => (t === 'team1' ? 'team2' : 'team1');
+        const winner = checkFinished(game).winner;
+        const r = { handCount: hands.length, winner };
+
+        // running totals: lead changes and the deepest deficit each team came back from
+        let t1 = 0, t2 = 0, prev = null, leadChanges = 0;
+        const deficit = { team1: 0, team2: 0 };
+        hands.forEach(h => {
+            t1 += h.scores.team1; t2 += h.scores.team2;
+            const leader = t1 > t2 ? 'team1' : t2 > t1 ? 'team2' : null;
+            if (leader && prev && leader !== prev) leadChanges++;
+            if (leader) prev = leader;
+            deficit.team1 = Math.max(deficit.team1, t2 - t1);
+            deficit.team2 = Math.max(deficit.team2, t1 - t2);
+        });
+        r.leadChanges = leadChanges;
+        r.comeback = winner && deficit[winner] > 0 ? { team: winner, deficit: deficit[winner] } : null;
+
+        r.shelemCount = hands.filter(h => h.hakemScore === 165).length;
+        r.yasaCount = hands.filter(h => h.scores[getTeam(game, h.hakem)] < 0 && h.hakemScore < 85 && h.commitment < 165).length;
+        r.avgCommitment = round5(hands.reduce((a, h) => a + h.commitment, 0) / hands.length);
+
+        // biggest single hand
+        let big = null;
+        hands.forEach((h, i) => teams.forEach(t => { if (!big || h.scores[t] > big.score) big = { score: h.scores[t], team: t, hand: i + 1, hakem: h.hakem }; }));
+        r.biggestHand = big && big.score > 0 ? big : null;
+
+        // highest commitment that succeeded
+        let hc = null;
+        hands.forEach((h, i) => { if (h.scores[getTeam(game, h.hakem)] >= 0 && (!hc || h.commitment > hc.commitment)) hc = { commitment: h.commitment, hakem: h.hakem, hand: i + 1 }; });
+        r.highestCommit = hc;
+
+        // most common commitment / suit
+        const mode = (values) => {
+            const cnt = {};
+            values.forEach(v => { cnt[v] = (cnt[v] || 0) + 1; });
+            const top = Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a] || b - a)[0];
+            return top === undefined ? null : { value: top, count: cnt[top] };
+        };
+        r.commonCommit = mode(hands.map(h => h.commitment));
+        const suits = hands.map(h => h.suit).filter(Boolean);
+        r.commonSuit = suits.length ? mode(suits) : null;
+
+        // longest run of hands won (higher score than the opponent) per team
+        const run = { team1: 0, team2: 0 }, cur = { team1: 0, team2: 0 };
+        hands.forEach(h => teams.forEach(t => {
+            if (h.scores[t] > h.scores[other(t)]) { cur[t]++; run[t] = Math.max(run[t], cur[t]); } else cur[t] = 0;
+        }));
+        r.streak = run.team1 === run.team2 ? null : (run.team1 > run.team2 ? { team: 'team1', n: run.team1 } : { team: 'team2', n: run.team2 });
+        if (r.streak && r.streak.n < 3) r.streak = null;
+
+        // per-player hakem totals and shelems; dealer score difference
+        const per = {};
+        Object.keys(game.players).forEach(p => { per[p] = { hakemHands: 0, hakemPoints: 0, shelems: 0, deals: 0, dealerDiff: 0 }; });
+        hands.forEach((h, i) => {
+            const ht = getTeam(game, h.hakem);
+            per[h.hakem].hakemHands++; per[h.hakem].hakemPoints += h.scores[ht];
+            if (h.hakemScore === 165) per[h.hakem].shelems++;
+            const d = getHandDealer(game, h, i);
+            per[d].deals++; per[d].dealerDiff += h.scores[getTeam(game, d)] - h.scores[getOppositeTeam(game, d)];
+        });
+        const uniqueMax = (pick, filter) => {
+            const c = Object.keys(per).filter(p => filter(per[p]));
+            if (!c.length) return null;
+            const best = Math.max(...c.map(p => pick(per[p])));
+            const w = c.filter(p => pick(per[p]) === best);
+            return w.length === 1 ? { player: w[0], value: best } : null;
+        };
+        r.bestHakem = uniqueMax(x => x.hakemPoints, x => x.hakemHands >= 2 && x.hakemPoints > 0);
+        r.luckyDealer = uniqueMax(x => x.dealerDiff, x => x.deals >= 2 && x.dealerDiff > 0);
+        r.shelemStar = uniqueMax(x => x.shelems, x => x.shelems > 0);
+
+        // awards: { awardId: [playerKeys] }
+        const awards = {};
+        if (winner) {
+            const winners = getTeamPlayers(game, winner);
+            const cand = winners.filter(p => per[p].hakemHands >= 2 && per[p].hakemPoints > 0);
+            if (cand.length) {
+                const best = Math.max(...cand.map(p => per[p].hakemPoints));
+                const w = cand.filter(p => per[p].hakemPoints === best);
+                if (w.length === 1) awards.mvp_bazi = w;
+            }
+            if (r.comeback && r.comeback.deficit >= 0.15 * game.targetScore) awards.comeback_award = winners.slice();
+        }
+        if (r.shelemStar) awards.shelem_star = [r.shelemStar.player];
+        if (r.luckyDealer) awards.khosh_ghadam = [r.luckyDealer.player];
+        r.awards = awards;
+        return r;
+    };
+
+    const renderGameAnalysis = (game) => {
+        const a = computeGameAnalysis(game);
+        if (!a) return '';
+        const nf = toPersianDigits;
+        const pn = (p) => toPersianName(game.players[p]);
+        const facts = [];
+        if (a.biggestHand) facts.push(`بیشترین امتیاز یک دست: <b>${nf(a.biggestHand.score)}</b> امتیاز برای ${teamLabel(game, a.biggestHand.team)} (دست ${nf(a.biggestHand.hand)}، حاکم ${pn(a.biggestHand.hakem)}).`);
+        if (a.comeback) facts.push(`بزرگ‌ترین بازگشت: ${teamLabel(game, a.comeback.team)} از <b>${nf(a.comeback.deficit)}</b> امتیاز عقب‌ماندگی جلو افتاد.`);
+        if (a.streak) facts.push(`طولانی‌ترین برد پشت‌سرهم: ${teamLabel(game, a.streak.team)} با <b>${nf(a.streak.n)}</b> دست.`);
+        if (a.highestCommit) facts.push(`بالاترین تعهدِ موفق: <b>${nf(a.highestCommit.commitment)}</b> توسط ${pn(a.highestCommit.hakem)} (دست ${nf(a.highestCommit.hand)}).`);
+        if (a.commonCommit) facts.push(`پرتکرارترین تعهد: <b>${nf(a.commonCommit.value)}</b> (${nf(a.commonCommit.count)} بار).`);
+        if (a.commonSuit) facts.push(`پرتکرارترین حکم: <span class="suit">${getSuitSymbol(a.commonSuit.value)}</span> (${nf(a.commonSuit.count)} بار).`);
+        if (a.bestHakem) facts.push(`بهترین حاکم: ${pn(a.bestHakem.player)} با مجموع <b>${nf(a.bestHakem.value)}</b> امتیاز.`);
+        if (a.luckyDealer) facts.push(`خوش‌قدم‌ترین پاسور: ${pn(a.luckyDealer.player)} (اختلاف مثبت <b>${nf(a.luckyDealer.value)}</b> امتیاز).`);
+
+        const awardRows = Object.keys(a.awards).map(id =>
+            `<div class="award-row"><span class="badge-chip badge-award" data-badge-id="${id}">${badgeData[id].name}</span><span>${a.awards[id].map(pn).join(' و ')}</span></div>`).join('');
+
+        return `
+            <div class="stat-card game-analysis">
+                <h4>تحلیل پایان بازی</h4>
+                <div class="stat-tiles">
+                    ${statTile('دست بازی‌شده', nf(a.handCount))}
+                    ${statTile('تغییر پیشتازی', nf(a.leadChanges))}
+                    ${statTile('شلم / یاسا', `${nf(a.shelemCount)} / ${nf(a.yasaCount)}`)}
+                    ${statTile('میانگین تعهد', nf(a.avgCommitment))}
+                </div>
+                ${awardRows ? `<div class="awards-box"><strong>جوایز بازی</strong>${awardRows}</div>` : ''}
+                ${facts.length ? `<ul class="fact-list">${facts.map(f => `<li>${f}</li>`).join('')}</ul>` : ''}
+            </div>`;
+    };
+
+    const statTile = (label, value, cls = '') => `<div class="stat-tile ${cls}"><span class="stat-tile-value">${value}</span><span class="stat-tile-label">${label}</span></div>`;
+    const statChip = (text, cls = '') => `<span class="stat-chip ${cls}">${text}</span>`;
+
     const renderStats = (game) => {
         const hakemStatsContainer = document.getElementById('hakem-stats');
         const dealerStatsContainer = document.getElementById('dealer-stats');
@@ -879,7 +1029,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let hakemCard = '';
             if (stats.hakemCount === 0) {
-                hakemCard = `<div class="stat-card"><h4>${stats.name} ${renderBadges(hakemBadges, 'hakem')}</h4><p>هیچ وقت حاکم نبوده.</p></div>`;
+                hakemCard = `<div class="stat-card stat-empty"><h4>${stats.name} ${renderBadges(hakemBadges, 'hakem')}</h4><p>هیچ وقت حاکم نبوده.</p></div>`;
             } else {
                  const successRate = Math.round((stats.successfulHakem / stats.hakemCount) * 100);
                 let successText = '';
@@ -903,13 +1053,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 const hakemHands = game.hands.filter(h => h.hakem === pKey);
                 const hakemScores = hakemHands.map(h => h.scores[getTeam(game, h.hakem)]);
 
+                const commitTotal = allCommits.reduce((acc, c) => acc + c * (stats.commitments[c].s + stats.commitments[c].f), 0);
+                const nf = (v) => toPersianDigits(v);
                 hakemCard = `
                     <div class="stat-card">
                         <h4>${stats.name} ${renderBadges(hakemBadges, 'hakem')}</h4>
-                        <p>${toPersianDigits(stats.hakemCount)} بار حاکم شده | ${successText} | ${failText} (<span class="${successRate > 60 ? 'success' : 'fail'}">${toPersianDigits(successRate)}٪ موفقیت</span>)</p>
-                        <p>امتیازی که تعهد کرده | میانگین: <span class="score-value">${toPersianDigits(Math.round(allCommits.reduce((acc, c) => acc + c * (stats.commitments[c].s + stats.commitments[c].f), 0) / stats.hakemCount / 5) * 5)}</span> | بیشترین: <span class="score-value">${toPersianDigits(Math.max(...allCommits))}</span> | کمترین: <span class="score-value">${toPersianDigits(Math.min(...allCommits))}</span></p>
-                        <p>امتیازی که در زمان حکومتش گرفته | میانگین: <span class="score-value">${toPersianDigits(Math.round(stats.pointsFor / stats.hakemCount))}</span> | بیشترین: <span class="score-value">${toPersianDigits(Math.max(...hakemScores))}</span> | کمترین: <span class="score-value">${toPersianDigits(Math.min(...hakemScores))}</span></p>
-                        <p>در مجموع زمان‌های حکومتش | <span class="score-value success">${toPersianDigits(stats.pointsFor)}</span> امتیاز گرفته | <span class="score-value fail">${toPersianDigits(stats.pointsAgainst)}</span> امتیاز به تیم حریف داده</p>
+                        <div class="stat-tiles">
+                            ${statTile('بار حاکم شده', nf(stats.hakemCount))}
+                            ${statTile('موفقیت', nf(successRate) + '٪', successRate > 60 ? 'ok' : 'bad')}
+                            ${statTile('میانگین تعهد', nf(round5(commitTotal / stats.hakemCount)))}
+                            ${statTile('میانگین امتیاز', nf(round5(stats.pointsFor / stats.hakemCount)))}
+                        </div>
+                        <div class="success-bar" title="موفق / ناموفق"><div style="width:${successRate}%"></div></div>
+                        <div class="stat-chips">
+                            ${stats.successfulHakem ? statChip(nf(stats.successfulHakem) + ' بار موفق', 'ok') : ''}
+                            ${failCount ? statChip(nf(failCount) + ' بار منفی', 'bad') : ''}
+                            ${stats.shelemCount ? statChip(nf(stats.shelemCount) + ' شلم', 'ok') : ''}
+                            ${stats.yasaCount ? statChip(nf(stats.yasaCount) + ' یاسا', 'bad') : ''}
+                            ${statChip('تعهد: ' + nf(Math.min(...allCommits)) + ' تا ' + nf(Math.max(...allCommits)))}
+                            ${statChip('امتیاز حاکم: ' + nf(Math.min(...hakemScores)) + ' تا ' + nf(Math.max(...hakemScores)))}
+                            ${statChip('گرفته ' + nf(stats.pointsFor) + ' · داده ' + nf(stats.pointsAgainst))}
+                        </div>
                         <div class="individual-stats-grid">
                             <div class="chart-wrapper"><canvas id="hakem-commit-chart-${pKey}"></canvas></div>
                             <div class="chart-wrapper"><canvas id="hakem-suit-chart-${pKey}"></canvas></div>
@@ -921,7 +1085,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let dealerCard = '';
             if (stats.deals === 0) {
-                dealerCard = `<div class="stat-card"><h4>${stats.name} ${renderBadges(dealerBadges, 'dealer')}</h4><p>تا حالا پاسور نبوده است.</p></div>`;
+                dealerCard = `<div class="stat-card stat-empty"><h4>${stats.name} ${renderBadges(dealerBadges, 'dealer')}</h4><p>تا حالا پاسور نبوده است.</p></div>`;
             } else {
                  let dealResultText = ``;
                 if(stats.dealsSuccess > 0) dealResultText += `${toPersianDigits(stats.dealsSuccess)} بار موفق بوده‌اند`;
@@ -934,12 +1098,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 const allDealerCommits = Object.keys(stats.dealerCommitments).map(Number);
 
+                const dTotal = allDealerCommits.reduce((acc, c) => acc + c * (stats.dealerCommitments[c].s + stats.dealerCommitments[c].f), 0);
+                const nf = (v) => toPersianDigits(v);
+                const dRate = Math.round((stats.dealsSuccess / stats.deals) * 100);
                 dealerCard = `
                     <div class="stat-card">
                         <h4>${stats.name} ${renderBadges(dealerBadges, 'dealer')}</h4>
-                        <p>${toPersianDigits(stats.deals)} بار پاسور بوده و زمان‌هایی که کارت پخش کرده حاکم‌ها به طور میانگین <span class="score-value">${toPersianDigits(Math.round(allDealerCommits.reduce((acc, c) => acc + c * (stats.dealerCommitments[c].s + stats.dealerCommitments[c].f), 0) / stats.deals / 5) * 5)}</span> امتیاز خوانده‌اند.</p>
-                        <p>بیشترین تعهد حاکم در زمان پاسور بودن ${stats.name} <span class="score-value">${toPersianDigits(Math.max(...allDealerCommits))}</span> و کمترین تعهد <span class="score-value">${toPersianDigits(Math.min(...allDealerCommits))}</span> بوده است.</p>
-                        <p>وقت‌هایی که ${stats.name} کارت پخش کرده، ${dealResultText}.</p>
+                        <div class="stat-tiles">
+                            ${statTile('بار پاسور', nf(stats.deals))}
+                            ${statTile('میانگین تعهد حاکم', nf(round5(dTotal / stats.deals)))}
+                            ${statTile('بیشترین تعهد', nf(Math.max(...allDealerCommits)))}
+                            ${statTile('کمترین تعهد', nf(Math.min(...allDealerCommits)))}
+                        </div>
+                        <div class="success-bar" title="موفق / ناموفق"><div style="width:${dRate}%"></div></div>
+                        <div class="stat-chips">
+                            ${stats.dealsSuccess ? statChip(nf(stats.dealsSuccess) + ' بار حاکم موفق', 'ok') : ''}
+                            ${stats.dealsFail ? statChip(nf(stats.dealsFail) + ' بار حاکم منفی', 'bad') : ''}
+                            ${stats.dealsShelem ? statChip(nf(stats.dealsShelem) + ' شلم', 'ok') : ''}
+                            ${stats.dealsYasa ? statChip(nf(stats.dealsYasa) + ' یاسا', 'bad') : ''}
+                        </div>
                          <div class="individual-stats-grid">
                             <div class="chart-wrapper"><canvas id="dealer-commit-chart-${pKey}"></canvas></div>
                             <div class="chart-wrapper"><canvas id="dealer-suit-chart-${pKey}"></canvas></div>
