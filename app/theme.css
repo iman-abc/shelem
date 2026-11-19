@@ -198,7 +198,7 @@ html, body, button, input, textarea, select, .lock-box, .modal-content { font-fa
 
 /* --- Admin read-only view --- */
 .readonly-view #start-new-hand-btn, .readonly-view #register-score-btn, .readonly-view #edit-hand-btn,
-.readonly-view .edit-btn, .readonly-view #export-game-btn { display: none !important; }
+.readonly-view .edit-btn, .readonly-view #export-game-btn, .readonly-view .delete-hand-btn, .readonly-view #change-dealer-btn, .readonly-view .edit-team-btn { display: none !important; }
 .ro-banner { text-align: center; padding: .5rem; margin-bottom: .75rem; border-radius: 10px; background: var(--primary-soft); color: var(--primary-color); font-size: .85rem; font-weight: 600; }
 .admin-games { max-height: 65vh; overflow-y: auto; text-align: right; }
 .admin-games h4 { margin: .9rem 0 .4rem; color: var(--primary-color); }

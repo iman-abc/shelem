@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Dealer Badges
         dast_tala: { name: 'دست طلا', description: 'تنها کسی که حداقل سه بار دست داده و در مجموع تفاضل امتیاز تیمش از حریف مثبت و بیشترین بوده است.', type: 'dealer' },
         dast_siah: { name: 'دست‌سیاه', description: 'تنها کسی که حداقل سه بار دست داده و در مجموع تفاضل امتیاز تیمش از حریف منفی و کمترین بوده است.', type: 'dealer' },
-        kabous_dealer: { name: 'کابوس دیلر', description: 'دیلری که حداقل ۳ بار دست داده و تیمش در تمام آن دست‌ها باخته است.', type: 'dealer' },
+        kabous_dealer: { name: 'کابوس پاسور', description: 'پاسوری که حداقل ۳ بار دست داده و تیمش در تمام آن دست‌ها باخته است.', type: 'dealer' },
         // Team Badges
         shekarchi_hakem: { name: 'شکارچی حاکم', description: 'تیمی که بیشتر از همه (و حداقل ۳ بار) تعهد حاکم حریف را شکسته است.', type: 'team' },
         be_khodet_bia: { name: 'به خودت بیا!', description: 'تیمی که امتیازش از تیم حریف کمتر است و اختلاف امتیازها بیشتر از ۳۵ درصد هدف بازی است.', type: 'team' },
@@ -328,14 +328,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                         <div class="team-score-card">
                             <div class="team-info">
-                                <span class="team-names">${toPersianName(game.players.p1)} و ${toPersianName(game.players.p3)}</span>
+                                <span class="team-names">${teamLabel(game, 'team1')}</span>
                                 <span class="team-score score-value ${team1Score < 0 ? 'negative' : ''}">${toPersianDigits(team1Score)}</span>
                             </div>
                             <div class="score-progress"><div class="progress-bar" style="width: ${progress1}%;"></div></div>
                         </div>
                         <div class="team-score-card">
                             <div class="team-info">
-                                <span class="team-names">${toPersianName(game.players.p2)} و ${toPersianName(game.players.p4)}</span>
+                                <span class="team-names">${teamLabel(game, 'team2')}</span>
                                 <span class="team-score score-value ${team2Score < 0 ? 'negative' : ''}">${toPersianDigits(team2Score)}</span>
                             </div>
                              <div class="score-progress"><div class="progress-bar" style="width: ${progress2}%;"></div></div>
@@ -386,14 +386,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (game.isFinished) {
             let winnerTeam, winnerScore, loserTeam, loserScore;
             if (team1Score > team2Score) {
-                winnerTeam = getTeamPlayers(game, 'team1').map(p => toPersianName(game.players[p])).join(' و ');
+                winnerTeam = teamLabel(game, 'team1');
                 winnerScore = team1Score;
-                loserTeam = getTeamPlayers(game, 'team2').map(p => toPersianName(game.players[p])).join(' و ');
+                loserTeam = teamLabel(game, 'team2');
                 loserScore = team2Score;
             } else {
-                winnerTeam = getTeamPlayers(game, 'team2').map(p => toPersianName(game.players[p])).join(' و ');
+                winnerTeam = teamLabel(game, 'team2');
                 winnerScore = team2Score;
-                loserTeam = getTeamPlayers(game, 'team1').map(p => toPersianName(game.players[p])).join(' و ');
+                loserTeam = teamLabel(game, 'team1');
                 loserScore = team1Score;
             }
     
@@ -433,9 +433,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
         } else {
-            const nextDealerIndex = game.hands.length % 4;
-            const dealerOrder = [game.firstDealer, getNextPlayer(game.firstDealer), getNextPlayer(getNextPlayer(game.firstDealer)), getNextPlayer(getNextPlayer(getNextPlayer(game.firstDealer)))];
-            const nextDealer = toPersianName(game.players[dealerOrder[nextDealerIndex]]);
+            const nextDealer = toPersianName(game.players[getNextDealer(game)]);
             
             let lastHandInfo = '';
             if (game.hands.length > 0) {
@@ -457,6 +455,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <h3>${lastHandInfo}</h3>
                     <p>نوبت ${nextDealer} است که کارت‌ها را پخش کند.</p>
                     <button class="btn btn-primary" id="start-new-hand-btn">شروع دست جدید</button>
+                    <button class="btn btn-secondary" id="change-dealer-btn">تغییر پاسور</button>
                 </div>
             `;
         }
@@ -498,7 +497,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="team-score-card">
                     <div class="team-info">
                         <div class="team-names-badges">
-                            <span class="team-names">${toPersianName(game.players.p1)} و ${toPersianName(game.players.p3)}</span>
+                            <span class="team-names">${teamLabel(game, 'team1')}</span><button class="edit-team-btn" data-edit-teams="1" title="ویرایش نام تیم">✎</button>
                             <div class="badges-container">${renderBadges(team1Badges, 'team')}</div>
                         </div>
                         <span class="team-score score-value ${team1Score < 0 ? 'negative' : ''}">${toPersianDigits(team1Score)}</span>
@@ -509,7 +508,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="team-score-card">
                     <div class="team-info">
                          <div class="team-names-badges">
-                            <span class="team-names">${toPersianName(game.players.p2)} و ${toPersianName(game.players.p4)}</span>
+                            <span class="team-names">${teamLabel(game, 'team2')}</span><button class="edit-team-btn" data-edit-teams="1" title="ویرایش نام تیم">✎</button>
                             <div class="badges-container">${renderBadges(team2Badges, 'team')}</div>
                         </div>
                         <span class="team-score score-value ${team2Score < 0 ? 'negative' : ''}">${toPersianDigits(team2Score)}</span>
@@ -565,6 +564,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const startNewHandBtn = document.getElementById('start-new-hand-btn');
         if(startNewHandBtn) startNewHandBtn.addEventListener('click', () => showNewHandModal(gameId, 'hakem'));
 
+        document.querySelectorAll('[data-edit-teams]').forEach(b => b.addEventListener('click', () => showEditTeamNamesModal(gameId)));
+
+        const changeDealerBtn = document.getElementById('change-dealer-btn');
+        if (changeDealerBtn) changeDealerBtn.addEventListener('click', () => showChangeDealerModal(gameId));
+
         const registerScoreBtn = document.getElementById('register-score-btn');
         if(registerScoreBtn) registerScoreBtn.addEventListener('click', () => showRegisterScoreModal(gameId));
         
@@ -591,8 +595,7 @@ document.addEventListener('DOMContentLoaded', () => {
             content += `<div class="placeholder"><p>هنوز دستی بازی نشده است.</p></div>`;
         } else {
             game.hands.forEach((hand, index) => {
-                const dealerOrder = [game.firstDealer, getNextPlayer(game.firstDealer), getNextPlayer(getNextPlayer(game.firstDealer)), getNextPlayer(getNextPlayer(getNextPlayer(game.firstDealer)))];
-                const dealer = toPersianName(game.players[dealerOrder[index % 4]]);
+                const dealer = toPersianName(game.players[getHandDealer(game, hand, index)]);
                 const hakemTeam = getTeam(game, hand.hakem);
                 const opponentTeam = getOppositeTeam(game, hand.hakem);
                 const hakemScore = hand.scores[hakemTeam];
@@ -645,6 +648,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 امتیاز حریف: <span class="score-value">${toPersianDigits(opponentScore)}</span>
                             </div>
                             ${index === game.hands.length - 1 ? `<button class="btn edit-btn" data-hand-index="${index}">ویرایش</button>` : ''}
+                            <button class="btn btn-danger delete-hand-btn" data-hand-index="${index}">حذف</button>
                         </div>
                         ${lockNote}
                         ${badgeChangesHTML}
@@ -654,6 +658,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         historyPage.innerHTML = content;
         
+        historyPage.querySelectorAll('.delete-hand-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => showDeleteHandModal(gameId, parseInt(e.currentTarget.dataset.handIndex)));
+        });
+
         historyPage.querySelectorAll('.edit-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const handIndex = parseInt(e.target.dataset.handIndex);
@@ -711,7 +719,7 @@ document.addEventListener('DOMContentLoaded', () => {
         createAggregatePointsChart(playerStats, game);
     };
 
-    const teamNames = (game) => [`${toPersianName(game.players.p1)} و ${toPersianName(game.players.p3)}`, `${toPersianName(game.players.p2)} و ${toPersianName(game.players.p4)}`];
+    const teamNames = (game) => [teamLabel(game, 'team1'), teamLabel(game, 'team2')];
 
     const createMainScoreChart = (game) => {
         const c = palette();
@@ -812,9 +820,8 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         });
 
-        const dealerOrder = [game.firstDealer, getNextPlayer(game.firstDealer), getNextPlayer(getNextPlayer(game.firstDealer)), getNextPlayer(getNextPlayer(getNextPlayer(game.firstDealer)))];
         game.hands.forEach((hand, index) => {
-            const dealerKey = dealerOrder[index % 4];
+            const dealerKey = getHandDealer(game, hand, index);
             const hakemKey = hand.hakem;
             const hakemTeam = getTeam(game, hakemKey);
             const hakemScore = hand.scores[hakemTeam];
@@ -991,7 +998,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${byOwner[o].map(g => `
                         <button class="grid-btn admin-game-btn" data-vid="${g.id}">
                             <strong>${g.name}</strong>
-                            <span>${toPersianName(g.players.p1)} و ${toPersianName(g.players.p3)} <b>${toPersianDigits(total(g, 'team1'))}</b> — <b>${toPersianDigits(total(g, 'team2'))}</b> ${toPersianName(g.players.p2)} و ${toPersianName(g.players.p4)}</span>
+                            <span>${teamLabel(g, 'team1')} <b>${toPersianDigits(total(g, 'team1'))}</b> — <b>${toPersianDigits(total(g, 'team2'))}</b> ${teamLabel(g, 'team2')}</span>
                             <small>${getRelativeTimeWithDay(g.lastActivity || g.createdAt)}${g.isFinished ? ' · تمام‌شده' : ''}</small>
                         </button>`).join('')}
                 `).join('') : '<p class="placeholder">هنوز بازی‌ای روی سرور ثبت نشده است.</p>'}
@@ -1485,11 +1492,14 @@ document.addEventListener('DOMContentLoaded', () => {
         handResult.scores[nonHakemTeam] = scores.nonHakem;
         
         ensureBadgesCurrent(game); // covers games pulled from the cloud that missed the startup refresh
+        backfillDealers(game);
+        handResult.dealer = getNextDealer(game);
         const { newBadges, changes } = calculateAllBadges(game, game.hands.length, handResult);
         game.badges = newBadges;
         handResult.badgeChanges = changes;
 
         game.hands.push(handResult);
+        delete game.nextDealer;
         game.currentHand = null;
         game.lastActivity = Date.now();
         
@@ -1499,7 +1509,7 @@ document.addEventListener('DOMContentLoaded', () => {
             game.isFinished = true;
             game.finishReason = fin.reason;
             if (fin.winner) {
-                const winnerPlayers = getTeamPlayers(game, fin.winner).map(p => toPersianName(game.players[p]));
+                const winnerPlayers = [teamLabel(game, fin.winner)];
                 winnerShown = true;
                 showWinnerModal(winnerPlayers, fin.reason, () => { if (changes.length > 0) showBadgeChangesModal(changes); });
             }
@@ -1549,6 +1559,99 @@ document.addEventListener('DOMContentLoaded', () => {
     const getOppositeTeam = (game, playerKey) => (getTeam(game, playerKey) === 'team1') ? 'team2' : 'team1';
     const getTeamPlayers = (game, team) => team === 'team1' ? ['p1', 'p3'] : ['p2', 'p4'];
     const getSuitSymbol = (suit) => ({ spades: '♠', hearts: '♥', diamonds: '♦', clubs: '♣' })[suit] || '';
+    const showChangeDealerModal = (gameId) => {
+        const game = findGame(gameId);
+        if (!game || game._readOnly) return;
+        const current = getNextDealer(game);
+        openModal(`
+            <div class="modal-header"><h2>تغییر پاسور</h2><button class="modal-close-btn">&times;</button></div>
+            <p class="modal-sub">چه کسی دست بعدی را پخش کند؟</p>
+            <div class="button-grid">
+                ${Object.keys(game.players).map(pKey => `<button class="grid-btn ${pKey === current ? 'selected' : ''}" data-player="${pKey}">${toPersianName(game.players[pKey])}</button>`).join('')}
+            </div>
+        `, () => {
+            modalContent.querySelectorAll('.grid-btn[data-player]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    backfillDealers(game);
+                    if (game.hands.length === 0) { game.firstDealer = btn.dataset.player; delete game.nextDealer; } else game.nextDealer = btn.dataset.player;
+                    rebuildBadges(game, false);
+                    game.lastActivity = Date.now();
+                    db.save();
+                    closeModal();
+                    renderGamePage(gameId);
+                });
+            });
+        });
+    };
+
+    const showDeleteHandModal = (gameId, handIndex) => {
+        const game = findGame(gameId);
+        if (!game || game._readOnly || !game.hands[handIndex]) return;
+        openModal(`
+            <div class="modal-header"><h2>تایید حذف دست</h2></div>
+            <p>آیا از حذف دست ${toPersianDigits(handIndex + 1)} مطمئن هستید؟ امتیازها و نشان‌ها دوباره محاسبه می‌شوند.</p>
+            <div class="summary-buttons">
+                <button id="confirm-delete-hand-btn" class="btn btn-danger">بله، حذف کن</button>
+                <button id="cancel-delete-hand-btn" class="btn btn-secondary">انصراف</button>
+            </div>
+        `, () => {
+            document.getElementById('cancel-delete-hand-btn').addEventListener('click', closeModal);
+            document.getElementById('confirm-delete-hand-btn').addEventListener('click', () => {
+                backfillDealers(game);
+                const [removed] = game.hands.splice(handIndex, 1);
+                if (handIndex === game.hands.length) game.nextDealer = removed.dealer; // last hand removed: same dealer deals again
+                rebuildBadges(game, true);
+                const fin = checkFinished(game);
+                game.isFinished = fin.finished; game.finishReason = fin.reason;
+                game.lastActivity = Date.now();
+                db.save();
+                closeModal();
+                renderHistoryPage(gameId);
+                renderGamePage(gameId);
+            });
+        });
+    };
+
+    // --- DEALER (stored per hand so deleting/fixing a hand never shifts the others) ---
+    // Team label: custom team name if set, else the two player names
+    const teamLabel = (game, team) => ((game.teamNames && game.teamNames[team]) || '').trim() ||
+        getTeamPlayers(game, team).map(p => toPersianName(game.players[p])).join(' و ');
+
+    const showEditTeamNamesModal = (gameId) => {
+        const game = findGame(gameId);
+        if (!game || game._readOnly) return;
+        const val = (t) => ((game.teamNames && game.teamNames[t]) || '').replace(/"/g, '&quot;');
+        const def = (t) => getTeamPlayers(game, t).map(p => toPersianName(game.players[p])).join(' و ');
+        openModal(`
+            <div class="modal-header"><h2>ویرایش نام تیم‌ها</h2><button class="modal-close-btn">&times;</button></div>
+            <div class="form-group"><label>تیم اول</label><input type="text" id="team-name-1" class="form-control" value="${val('team1')}" placeholder="${def('team1')}"></div>
+            <div class="form-group"><label>تیم دوم</label><input type="text" id="team-name-2" class="form-control" value="${val('team2')}" placeholder="${def('team2')}"></div>
+            <p class="modal-sub">اگر خالی بگذارید، نام بازیکنان نمایش داده می‌شود.</p>
+            <button id="save-team-names" class="btn btn-primary btn-full">ذخیره</button>
+        `, () => {
+            document.getElementById('save-team-names').addEventListener('click', () => {
+                game.teamNames = {
+                    team1: document.getElementById('team-name-1').value.trim().replace(/\s+/g, ' '),
+                    team2: document.getElementById('team-name-2').value.trim().replace(/\s+/g, ' ')
+                };
+                game.lastActivity = Date.now();
+                db.save();
+                closeModal();
+                renderGamePage(gameId);
+            });
+        });
+    };
+
+    const positionalDealer = (game, i) => { let d = game.firstDealer; for (let k = 0; k < (i % 4); k++) d = getNextPlayer(d); return d; };
+    const getHandDealer = (game, hand, i) => (hand && hand.dealer) || positionalDealer(game, i);
+    const getNextDealer = (game) => {
+        if (game.nextDealer) return game.nextDealer;
+        const n = (game.hands || []).length;
+        if (n === 0) return game.firstDealer;
+        return getNextPlayer(getHandDealer(game, game.hands[n - 1], n - 1));
+    };
+    const backfillDealers = (g) => { (g.hands || []).forEach((h, i) => { if (!h.dealer) h.dealer = positionalDealer(g, i); }); };
+
     const getNextPlayer = (playerKey) => {
         const order = ['p1', 'p2', 'p3', 'p4'];
         const index = order.indexOf(playerKey);
@@ -1556,15 +1659,25 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     
     // --- BADGE LOGIC ---
-    // Rebuild badges for a game saved before the current badge set (silently, no popup). Returns true if it ran.
+    // Replay every hand to rebuild a game's badges. rewriteHistory also regenerates each hand's badge-change text.
+    const rebuildBadges = (g, rewriteHistory) => {
+        let badges = { teams: { team1: [], team2: [] }, hakems: { p1: [], p2: [], p3: [], p4: [] }, dealers: { p1: [], p2: [], p3: [], p4: [] } };
+        const histories = [];
+        for (let k = 1; k <= (g.hands || []).length; k++) {
+            const r = calculateAllBadges({ ...g, hands: g.hands.slice(0, k), badges }, k - 1);
+            badges = r.newBadges;
+            histories.push(r.changes);
+        }
+        if ((g.hands || []).length) g.badges = badges; else g.badges = { teams: { team1: [], team2: [] }, hakems: { p1: [], p2: [], p3: [], p4: [] }, dealers: { p1: [], p2: [], p3: [], p4: [] } };
+        if (rewriteHistory) (g.hands || []).forEach((h, i) => { h.badgeChanges = histories[i]; });
+    };
+
+    // Silently bring a game saved before the current badge set up to date (no popup). Returns true if it ran.
     const ensureBadgesCurrent = (g) => {
         if (!g || g.badgesV === 3) return false;
         try {
-            let badges = { teams: { team1: [], team2: [] }, hakems: { p1: [], p2: [], p3: [], p4: [] }, dealers: { p1: [], p2: [], p3: [], p4: [] } };
-            for (let k = 1; k <= (g.hands || []).length; k++) {
-                badges = calculateAllBadges({ ...g, hands: g.hands.slice(0, k), badges }, k - 1).newBadges;
-            }
-            if ((g.hands || []).length) g.badges = badges;
+            backfillDealers(g);
+            rebuildBadges(g, false);
             g.badgesV = 3;
             return true;
         } catch (e) { console.error('Badge refresh failed', e); return false; }
@@ -1756,10 +1869,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // --- 2. DEALER BADGES ---
         const dealerStats = {};
         Object.keys(game.players).forEach(pKey => { dealerStats[pKey] = { scoreDiff: 0, dealCount: 0, lostCount: 0 }; });
-        const dealerOrder = [game.firstDealer, getNextPlayer(game.firstDealer), getNextPlayer(getNextPlayer(game.firstDealer)), getNextPlayer(getNextPlayer(getNextPlayer(game.firstDealer)))];
     
         allHands.forEach((hand, index) => {
-            const dealerKey = dealerOrder[index % 4];
+            const dealerKey = getHandDealer(game, hand, index);
             const dealerTeam = getTeam(game, dealerKey);
             const opponentTeam = getOppositeTeam(game, dealerKey);
             dealerStats[dealerKey].scoreDiff += (hand.scores[dealerTeam] - hand.scores[opponentTeam]);
@@ -1854,8 +1966,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const getName = (item) => {
                 if (item.type === 'player') return toPersianName(game.players[item.key]);
                 if (item.type === 'team') {
-                    const players = getTeamPlayers(game, item.key).map(p => toPersianName(game.players[p]));
-                    return `تیم ${players.join(' و ')}`;
+                    return (game.teamNames && (game.teamNames[item.key] || '').trim()) ? teamLabel(game, item.key) : `تیم ${teamLabel(game, item.key)}`;
                 }
             };
 

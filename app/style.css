@@ -965,3 +965,6 @@ input[type=number] {
     margin-top: 0.5rem;
     color: var(--text-muted);
 }
+
+.edit-team-btn { background: none; border: none; cursor: pointer; font-size: 0.9rem; opacity: 0.6; padding: 0 0.3rem; color: inherit; }
+.edit-team-btn:hover { opacity: 1; }
