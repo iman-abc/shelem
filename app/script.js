@@ -126,8 +126,17 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     // Best-effort Latin -> Persian transliteration for player names (display only).
     // Names with no Latin letters are returned unchanged.
+    // Known names are looked up first (case-insensitive); anything else falls back to the rule-based mapping below.
+    const PERSIAN_NAMES = {
+        iman: 'ایمان', sanaz: 'ساناز', reza: 'رضا', hanieh: 'هانیه', hanie: 'هانیه', haniyeh: 'هانیه', saeid: 'سعید', saeed: 'سعید', said: 'سعید',
+        roya: 'رویا', hosein: 'حسین', hossein: 'حسین', hosain: 'حسین', hussein: 'حسین', sahar: 'سحر', mahsa: 'مهسا',
+        ali: 'علی', mohammad: 'محمد', mohamad: 'محمد', mahdi: 'مهدی', amir: 'امیر', sara: 'سارا', maryam: 'مریم', fatemeh: 'فاطمه',
+        zahra: 'زهرا', hasan: 'حسن', hassan: 'حسن', omid: 'امید', nima: 'نیما', milad: 'میلاد', masoud: 'مسعود', abbas: 'عباس'
+    };
     const toPersianName = (name) => {
         if (!name || !/[A-Za-z]/.test(name)) return name;
+        const known = PERSIAN_NAMES[name.trim().toLowerCase()];
+        if (known) return known;
         const digraphs = { kh: 'خ', sh: 'ش', ch: 'چ', gh: 'ق', zh: 'ژ', th: 'ت', ph: 'ف', ee: 'ی', oo: 'و', aa: 'ا', ou: 'و', ei: 'ی', ai: 'ای' };
         const single = { a: 'ا', b: 'ب', c: 'ک', d: 'د', e: 'ه', f: 'ف', g: 'گ', h: 'ه', i: 'ی', j: 'ج', k: 'ک', l: 'ل', m: 'م', n: 'ن', o: 'و', p: 'پ', q: 'ق', r: 'ر', s: 'س', t: 'ت', u: 'و', v: 'و', w: 'و', x: 'کس', y: 'ی', z: 'ز' };
         const vowels = 'aeiouy';
@@ -312,14 +321,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                         <div class="team-score-card">
                             <div class="team-info">
-                                <span class="team-names">${game.players.p1} و ${game.players.p3}</span>
+                                <span class="team-names">${toPersianName(game.players.p1)} و ${toPersianName(game.players.p3)}</span>
                                 <span class="team-score score-value ${team1Score < 0 ? 'negative' : ''}">${toPersianDigits(team1Score)}</span>
                             </div>
                             <div class="score-progress"><div class="progress-bar" style="width: ${progress1}%;"></div></div>
                         </div>
                         <div class="team-score-card">
                             <div class="team-info">
-                                <span class="team-names">${game.players.p2} و ${game.players.p4}</span>
+                                <span class="team-names">${toPersianName(game.players.p2)} و ${toPersianName(game.players.p4)}</span>
                                 <span class="team-score score-value ${team2Score < 0 ? 'negative' : ''}">${toPersianDigits(team2Score)}</span>
                             </div>
                              <div class="score-progress"><div class="progress-bar" style="width: ${progress2}%;"></div></div>
@@ -370,14 +379,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (game.isFinished) {
             let winnerTeam, winnerScore, loserTeam, loserScore;
             if (team1Score > team2Score) {
-                winnerTeam = getTeamPlayers(game, 'team1').map(p => game.players[p]).join(' و ');
+                winnerTeam = getTeamPlayers(game, 'team1').map(p => toPersianName(game.players[p])).join(' و ');
                 winnerScore = team1Score;
-                loserTeam = getTeamPlayers(game, 'team2').map(p => game.players[p]).join(' و ');
+                loserTeam = getTeamPlayers(game, 'team2').map(p => toPersianName(game.players[p])).join(' و ');
                 loserScore = team2Score;
             } else {
-                winnerTeam = getTeamPlayers(game, 'team2').map(p => game.players[p]).join(' و ');
+                winnerTeam = getTeamPlayers(game, 'team2').map(p => toPersianName(game.players[p])).join(' و ');
                 winnerScore = team2Score;
-                loserTeam = getTeamPlayers(game, 'team1').map(p => game.players[p]).join(' و ');
+                loserTeam = getTeamPlayers(game, 'team1').map(p => toPersianName(game.players[p])).join(' و ');
                 loserScore = team1Score;
             }
     
@@ -400,12 +409,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
         } else if (currentHand) {
-            const nonHakemTeamPlayers = getTeamPlayers(game, getOppositeTeam(game, currentHand.hakem)).map(p => game.players[p]);
+            const nonHakemTeamPlayers = getTeamPlayers(game, getOppositeTeam(game, currentHand.hakem)).map(p => toPersianName(game.players[p]));
             const pointsToFail = 165 - currentHand.commitment + 5;
             currentHandHTML = `
                 <div class="current-hand-box">
                     <p style="font-size: 1.2rem; font-weight: 500;">
-                        <strong>حاکم:</strong> ${game.players[currentHand.hakem]} (<span class="score-value">${toPersianDigits(currentHand.commitment)}</span> امتیاز)
+                        <strong>حاکم:</strong> ${toPersianName(game.players[currentHand.hakem])} (<span class="score-value">${toPersianDigits(currentHand.commitment)}</span> امتیاز)
                         ${currentHand.suit ? `<strong>حکم:</strong> <span class="suit">${getSuitSymbol(currentHand.suit)}</span>` : ''}
                         <br>
                         <span style="font-size: 1rem; font-weight: normal;">اگر ${nonHakemTeamPlayers.join(' و ')} <span class="score-value">${toPersianDigits(pointsToFail)}</span> امتیاز بگیرند، حاکم منفی می‌خورد.</span>
@@ -419,15 +428,15 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             const nextDealerIndex = game.hands.length % 4;
             const dealerOrder = [game.firstDealer, getNextPlayer(game.firstDealer), getNextPlayer(getNextPlayer(game.firstDealer)), getNextPlayer(getNextPlayer(getNextPlayer(game.firstDealer)))];
-            const nextDealer = game.players[dealerOrder[nextDealerIndex]];
+            const nextDealer = toPersianName(game.players[dealerOrder[nextDealerIndex]]);
             
             let lastHandInfo = '';
             if (game.hands.length > 0) {
                 const lastHand = game.hands[game.hands.length - 1];
                 const hakemTeam = getTeam(game, lastHand.hakem);
                 const opponentTeam = getOppositeTeam(game, lastHand.hakem);
-                const hakemPlayers = getTeamPlayers(game, hakemTeam).map(p => game.players[p]);
-                const opponentPlayers = getTeamPlayers(game, opponentTeam).map(p => game.players[p]);
+                const hakemPlayers = getTeamPlayers(game, hakemTeam).map(p => toPersianName(game.players[p]));
+                const opponentPlayers = getTeamPlayers(game, opponentTeam).map(p => toPersianName(game.players[p]));
                 const hakemScore = lastHand.scores[hakemTeam];
                 const opponentScore = lastHand.scores[opponentTeam];
 
@@ -465,10 +474,10 @@ document.addEventListener('DOMContentLoaded', () => {
                      </div>
                      ${game.description ? `<p class="game-description"><strong>توضیحات:</strong> ${game.description}</p>` : ''}
                      <div class="player-setup-grid" style="margin-top: 1.5rem;">
-                        <div class="player-btn filled" data-player="p1">${game.players.p1}</div>
-                        <div class="player-btn filled" data-player="p2">${game.players.p2}</div>
-                        <div class="player-btn filled" data-player="p3">${game.players.p3}</div>
-                        <div class="player-btn filled" data-player="p4">${game.players.p4}</div>
+                        <div class="player-btn filled" data-player="p1">${toPersianName(game.players.p1)}</div>
+                        <div class="player-btn filled" data-player="p2">${toPersianName(game.players.p2)}</div>
+                        <div class="player-btn filled" data-player="p3">${toPersianName(game.players.p3)}</div>
+                        <div class="player-btn filled" data-player="p4">${toPersianName(game.players.p4)}</div>
                         <div class="table-center">
                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                         </div>
@@ -482,7 +491,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="team-score-card">
                     <div class="team-info">
                         <div class="team-names-badges">
-                            <span class="team-names">${game.players.p1} و ${game.players.p3}</span>
+                            <span class="team-names">${toPersianName(game.players.p1)} و ${toPersianName(game.players.p3)}</span>
                             <div class="badges-container">${renderBadges(team1Badges, 'team')}</div>
                         </div>
                         <span class="team-score score-value ${team1Score < 0 ? 'negative' : ''}">${toPersianDigits(team1Score)}</span>
@@ -493,7 +502,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="team-score-card">
                     <div class="team-info">
                          <div class="team-names-badges">
-                            <span class="team-names">${game.players.p2} و ${game.players.p4}</span>
+                            <span class="team-names">${toPersianName(game.players.p2)} و ${toPersianName(game.players.p4)}</span>
                             <div class="badges-container">${renderBadges(team2Badges, 'team')}</div>
                         </div>
                         <span class="team-score score-value ${team2Score < 0 ? 'negative' : ''}">${toPersianDigits(team2Score)}</span>
@@ -576,7 +585,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             game.hands.forEach((hand, index) => {
                 const dealerOrder = [game.firstDealer, getNextPlayer(game.firstDealer), getNextPlayer(getNextPlayer(game.firstDealer)), getNextPlayer(getNextPlayer(getNextPlayer(game.firstDealer)))];
-                const dealer = game.players[dealerOrder[index % 4]];
+                const dealer = toPersianName(game.players[dealerOrder[index % 4]]);
                 const hakemTeam = getTeam(game, hand.hakem);
                 const opponentTeam = getOppositeTeam(game, hand.hakem);
                 const hakemScore = hand.scores[hakemTeam];
@@ -617,7 +626,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             دست ${toPersianDigits(index + 1)} <span>(پاسور: ${dealer})</span>
                         </div>
                         <div class="hand-card-body">
-                            <span><strong>حاکم:</strong> ${game.players[hand.hakem]}</span>
+                            <span><strong>حاکم:</strong> ${toPersianName(game.players[hand.hakem])}</span>
                             <span><strong>تعهد:</strong> <span class="score-value">${toPersianDigits(hand.commitment)}</span></span>
                             ${hand.suit ? `<span><strong>حکم:</strong> <span class="suit">${getSuitSymbol(hand.suit)}</span></span>` : ''}
                         </div>
@@ -695,7 +704,7 @@ document.addEventListener('DOMContentLoaded', () => {
         createAggregatePointsChart(playerStats, game);
     };
 
-    const teamNames = (game) => [`${game.players.p1} و ${game.players.p3}`, `${game.players.p2} و ${game.players.p4}`];
+    const teamNames = (game) => [`${toPersianName(game.players.p1)} و ${toPersianName(game.players.p3)}`, `${toPersianName(game.players.p2)} و ${toPersianName(game.players.p4)}`];
 
     const createMainScoreChart = (game) => {
         const c = palette();
@@ -788,7 +797,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const playerStats = {};
         Object.keys(game.players).forEach(pKey => {
             playerStats[pKey] = {
-                name: game.players[pKey], hakemCount: 0, successfulHakem: 0, commitments: {},
+                name: toPersianName(game.players[pKey]), hakemCount: 0, successfulHakem: 0, commitments: {},
                 suits: { spades: {s:0, f:0}, hearts: {s:0, f:0}, diamonds: {s:0, f:0}, clubs: {s:0, f:0} },
                 dealerCommitments: {}, dealerSuits: { spades: {s:0, f:0}, hearts: {s:0, f:0}, diamonds: {s:0, f:0}, clubs: {s:0, f:0} },
                 pointsFor: 0, pointsAgainst: 0, shelemCount: 0, yasaCount: 0, deals: 0,
@@ -975,7 +984,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${byOwner[o].map(g => `
                         <button class="grid-btn admin-game-btn" data-vid="${g.id}">
                             <strong>${g.name}</strong>
-                            <span>${g.players.p1} و ${g.players.p3} <b>${toPersianDigits(total(g, 'team1'))}</b> — <b>${toPersianDigits(total(g, 'team2'))}</b> ${g.players.p2} و ${g.players.p4}</span>
+                            <span>${toPersianName(g.players.p1)} و ${toPersianName(g.players.p3)} <b>${toPersianDigits(total(g, 'team1'))}</b> — <b>${toPersianDigits(total(g, 'team2'))}</b> ${toPersianName(g.players.p2)} و ${toPersianName(g.players.p4)}</span>
                             <small>${getRelativeTimeWithDay(g.lastActivity || g.createdAt)}${g.isFinished ? ' · تمام‌شده' : ''}</small>
                         </button>`).join('')}
                 `).join('') : '<p class="placeholder">هنوز بازی‌ای روی سرور ثبت نشده است.</p>'}
@@ -1063,10 +1072,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         <button class="modal-back-btn">&larr;</button>
                     </div>
                     <div class="player-setup-grid">
-                        <button class="player-btn ${players.p1 ? 'filled' : ''}" data-player="p1">${players.p1 || 'بازیکن ۱'}</button>
-                        <button class="player-btn ${players.p2 ? 'filled' : ''}" data-player="p2">${players.p2 || 'بازیکن ۲'}</button>
-                        <button class="player-btn ${players.p3 ? 'filled' : ''}" data-player="p3">${players.p3 || 'بازیکن ۳'}</button>
-                        <button class="player-btn ${players.p4 ? 'filled' : ''}" data-player="p4">${players.p4 || 'بازیکن ۴'}</button>
+                        <button class="player-btn ${players.p1 ? 'filled' : ''}" data-player="p1">${toPersianName(players.p1) || 'بازیکن ۱'}</button>
+                        <button class="player-btn ${players.p2 ? 'filled' : ''}" data-player="p2">${toPersianName(players.p2) || 'بازیکن ۲'}</button>
+                        <button class="player-btn ${players.p3 ? 'filled' : ''}" data-player="p3">${toPersianName(players.p3) || 'بازیکن ۳'}</button>
+                        <button class="player-btn ${players.p4 ? 'filled' : ''}" data-player="p4">${toPersianName(players.p4) || 'بازیکن ۴'}</button>
                         <div class="table-center">
                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                         </div>
@@ -1119,7 +1128,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p>چه کسی اول از همه دست می‌دهد؟</p>
                     <div class="button-grid full-width-4">
                         ${Object.keys(gameData.players).map(pKey => `
-                            <button class="grid-btn" data-player="${pKey}">${gameData.players[pKey]}</button>
+                            <button class="grid-btn" data-player="${pKey}">${toPersianName(gameData.players[pKey])}</button>
                         `).join('')}
                     </div>
                 `;
@@ -1173,20 +1182,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 <input type="text" id="player-name-input" class="form-control" value="${currentName || ''}" placeholder="نام بازیکن را وارد کنید">
             </div>
             <div class="recent-players-list">
-                ${state.recentPlayers.map(p => `<button class="grid-btn recent-player-btn">${p}</button>`).join('')}
+                ${state.recentPlayers.map(p => `<button class="grid-btn recent-player-btn">${toPersianName(p)}</button>`).join('')}
             </div>
             <button id="confirm-player-name" class="btn btn-primary btn-full">تایید</button>
         `;
         openModal(modalHtml, () => {
             document.querySelectorAll('.recent-player-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
-                    const newName = normalizeName(btn.textContent);
+                    const newName = toPersianName(normalizeName(btn.textContent));
                     if (newName) callback(newName);
                 });
             });
 
             document.getElementById('confirm-player-name').addEventListener('click', () => {
-                const newName = normalizeName(document.getElementById('player-name-input').value);
+                const newName = toPersianName(normalizeName(document.getElementById('player-name-input').value));
                 if (newName) callback(newName);
             });
         });
@@ -1208,7 +1217,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <div class="button-grid full-width-4">
                         ${Object.keys(game.players).map(pKey => `
-                            <button class="grid-btn ${handData.hakem === pKey ? 'selected' : ''}" data-player="${pKey}">${game.players[pKey]}</button>
+                            <button class="grid-btn ${handData.hakem === pKey ? 'selected' : ''}" data-player="${pKey}">${toPersianName(game.players[pKey])}</button>
                         `).join('')}
                     </div>
                 `;
@@ -1289,7 +1298,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const game = findGame(gameId);
         const hand = game.currentHand;
         const nonHakemTeam = getOppositeTeam(game, hand.hakem);
-        const nonHakemPlayers = getTeamPlayers(game, nonHakemTeam).map(p => game.players[p]);
+        const nonHakemPlayers = getTeamPlayers(game, nonHakemTeam).map(p => toPersianName(game.players[p]));
         const failAt = 165 - hand.commitment + 5;
         const commitLabel = hand.commitment === 330 ? 'شلم' : hand.commitment === 660 ? 'سرشلم' : toPersianDigits(hand.commitment);
 
@@ -1305,7 +1314,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <h2>امتیاز حریف</h2>
                 ${fromFlow ? '<button class="modal-back-btn">&larr;</button>' : '<button class="modal-close-btn">&times;</button>'}
             </div>
-            <p class="modal-sub">حاکم: <strong>${game.players[hand.hakem]}</strong> · تعهد: <strong>${commitLabel}</strong></p>
+            <p class="modal-sub">حاکم: <strong>${toPersianName(game.players[hand.hakem])}</strong> · تعهد: <strong>${commitLabel}</strong></p>
             ${hand.commitment <= 165 ? `<p class="fail-threshold">اگر حریف ${toPersianDigits(failAt)} یا بیشتر بگیرد، حاکم منفی می‌خورد</p>` : ''}
             ${isLocked(game, nonHakemTeam) ? `<p class="fail-threshold" style="color:var(--primary-color)">🔒 تیم حریف بالای ${toPersianDigits(lockThreshold(game))} است؛ امتیازش فقط وقتی حساب می‌شود که حاکم منفی بخورد.</p>` : ''}
             <p class="modal-sub">حکم (اختیاری)</p>
@@ -1341,7 +1350,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const game = findGame(gameId);
         const hand = game.hands[handIndex];
         const nonHakemTeam = getOppositeTeam(game, hand.hakem);
-        const nonHakemPlayers = getTeamPlayers(game, nonHakemTeam).map(p => game.players[p]);
+        const nonHakemPlayers = getTeamPlayers(game, nonHakemTeam).map(p => toPersianName(game.players[p]));
         
         let buttons = '';
         for (let i = 0; i <= 160; i += 5) {
@@ -1482,7 +1491,7 @@ document.addEventListener('DOMContentLoaded', () => {
             game.isFinished = true;
             game.finishReason = fin.reason;
             if (fin.winner) {
-                const winnerPlayers = getTeamPlayers(game, fin.winner).map(p => game.players[p]);
+                const winnerPlayers = getTeamPlayers(game, fin.winner).map(p => toPersianName(game.players[p]));
                 winnerShown = true;
                 showWinnerModal(winnerPlayers, fin.reason, () => { if (changes.length > 0) showBadgeChangesModal(changes); });
             }
